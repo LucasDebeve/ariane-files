@@ -1,0 +1,126 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ 'review.title'|trans }}{% endblock %}
+
+{% set request = changeRequest %}
+{% set target = request.document %}
+{% set file = request.file %}
+
+{% macro diff_row(label, current, proposed, show_current) %}
+    <div class="grid gap-1 border-b border-line/60 py-3 last:border-0 sm:grid-cols-[10rem_1fr]">
+        <dt class="text-sm font-semibold text-muted">{{ label }}</dt>
+        <dd class="text-sm">
+            {% if show_current and current != proposed %}
+                <span class="block text-muted line-through decoration-coral/60">{{ current is empty ? '—' : current }}</span>
+                <span class="block font-semibold text-action-ink">{{ proposed is empty ? '—' : proposed }}</span>
+            {% else %}
+                <span class="font-semibold whitespace-pre-line">{{ proposed is empty ? '—' : proposed }}</span>
+            {% endif %}
+        </dd>
+    </div>
+{% endmacro %}
+
+{% block body %}
+<div class="mx-auto max-w-6xl px-4 pt-8 sm:px-6 lg:px-8">
+    <a href="{{ path('certified_index') }}" class="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-ink">{{ icons.icon('back', 'size-4') }} {{ 'certified.title'|trans }}</a>
+    <h1 class="page-title">{{ ('review.heading.' ~ request.type.value)|trans }}</h1>
+    <p class="mt-2 text-muted">{{ 'certified.proposed_by'|trans({'%name%': request.proposerName, '%date%': request.createdAt|format_datetime('long', 'short', locale: 'fr')}) }}</p>
+
+    <div class="mt-8 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+        <div class="min-w-0 space-y-6">
+            {% if request.type.value != 'ajout' %}
+                <div class="card flex items-center gap-4 p-5">
+                    {% if target %}
+                        {{ ui.file_badge(target.videoLink ? 'video' : target.mimeType|file_family) }}
+                        <div class="min-w-0">
+                            <p class="text-sm text-muted">{{ 'review.current_document'|trans }}</p>
+                            {% if target.published %}
+                                <a class="font-bold hover:underline" href="{{ path('document_show', {id: target.id}) }}">{{ target.title }}</a>
+                            {% else %}
+                                <p class="font-bold">{{ target.title }} <span class="pill">{{ 'review.not_published'|trans }}</span></p>
+                            {% endif %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">{{ 'review.document_gone'|trans }}</p>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if request.type.value == 'suppression' %}
+                <div class="card p-6">
+                    <h2 class="font-extrabold">{{ 'review.reason'|trans }}</h2>
+                    <p class="mt-2 whitespace-pre-line text-ink-soft">{{ request.reason }}</p>
+                </div>
+            {% else %}
+                {% set showCurrent = request.type.value == 'modification' and target %}
+                <div class="card p-6">
+                    <h2 class="mb-2 font-extrabold">{{ 'review.proposed_values'|trans }}</h2>
+                    <dl>
+                        {{ _self.diff_row('proposal.form.title'|trans, target ? target.title : null, request.title, showCurrent) }}
+                        {{ _self.diff_row('proposal.form.description'|trans, target ? target.description : null, request.description, showCurrent) }}
+                        {{ _self.diff_row('proposal.form.folder'|trans, target and target.folder ? target.folder.path : 'folder.root'|trans, proposedFolder ? proposedFolder.path : 'folder.root'|trans, showCurrent) }}
+                        {{ _self.diff_row('proposal.form.tags'|trans, target ? target.tags|map(t => t.name)|join(', ') : null, request.tagNames|join(', '), showCurrent) }}
+                        {% if request.videoUrl %}
+                            {{ _self.diff_row('proposal.form.video_url'|trans, target ? target.externalUrl : null, request.videoUrl, showCurrent) }}
+                        {% endif %}
+                        {% if request.reason %}
+                            {{ _self.diff_row('review.reason'|trans, null, request.reason, false) }}
+                        {% endif %}
+                    </dl>
+                </div>
+
+                {% if file %}
+                    <div class="card p-6">
+                        <div class="flex flex-wrap items-center gap-4">
+                            {{ ui.file_badge(file.mimeType|file_family) }}
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate font-bold">{{ file.originalName }}</p>
+                                <p class="text-sm text-muted">{{ file.size|bytes }} · SHA-256 <code class="font-mono text-xs">{{ file.sha256|slice(0, 16) }}…</code></p>
+                            </div>
+                            {% if fileUrl %}<a class="btn btn-ghost" href="{{ fileUrl }}" data-turbo="false">{{ icons.icon('download', 'size-4') }} {{ 'review.download_file'|trans }}</a>{% endif %}
+                        </div>
+                        <p class="mt-3 flex items-center gap-2 text-xs text-muted">{{ icons.icon('shield', 'size-4 text-action-dark') }} {{ 'review.file_checked'|trans }}</p>
+                        {% if fileUrl and fileIsPdf %}
+                            <div class="mt-4 rounded-2xl bg-cream-deep p-3" data-controller="pdf-viewer" data-pdf-viewer-url-value="{{ fileUrl }}" data-pdf-viewer-worker-value="{{ asset('lib/pdfjs/pdf.worker.min.mjs') }}" data-error-message="{{ 'document.preview_error'|trans }}">
+                                <p data-pdf-viewer-target="status" class="py-10 text-center text-muted">{{ 'document.preview_loading'|trans }}</p>
+                                <div data-pdf-viewer-target="pages" class="max-h-[60vh] overflow-y-auto"></div>
+                            </div>
+                        {% elseif fileUrl and fileIsImage %}
+                            <img src="{{ fileUrl }}" alt="" class="mt-4 max-h-[60vh] rounded-2xl">
+                        {% endif %}
+                    </div>
+                {% elseif request.videoUrl and request.videoUrl|video_embed %}
+                    <div class="aspect-video overflow-hidden rounded-[var(--radius-card)] bg-ink">
+                        <iframe src="{{ request.videoUrl|video_embed }}" title="{{ request.title }}" class="size-full" loading="lazy" sandbox="allow-scripts allow-same-origin allow-presentation" allow="encrypted-media; fullscreen"></iframe>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+
+        <aside class="lg:sticky lg:top-24 lg:self-start">
+            <div class="card p-6">
+                {% if not request.pending %}
+                    <p class="font-extrabold {{ request.status.value == 'validee' ? 'text-action-ink' : 'text-[#b3261e]' }}">{{ request.status.label|trans }}</p>
+                    <p class="mt-1 text-sm text-muted">{{ 'review.reviewed_by'|trans({'%name%': request.reviewer ? request.reviewer.displayName : '—', '%date%': request.reviewedAt|format_datetime('medium', 'short', locale: 'fr')}) }}</p>
+                    {% if request.reviewComment %}<p class="mt-4 whitespace-pre-line rounded-2xl bg-cream-deep p-4 text-sm">{{ request.reviewComment }}</p>{% endif %}
+                {% elseif isOwn %}
+                    <p class="flex items-start gap-2 rounded-2xl bg-sun/30 p-4 text-sm">{{ icons.icon('info', 'size-5 shrink-0') }} {{ 'review.own_proposal'|trans }}</p>
+                {% elseif canReview %}
+                    <h2 class="font-extrabold">{{ 'review.decision'|trans }}</h2>
+                    {{ form_start(form, {attr: {class: 'mt-4', 'data-turbo': 'false'}}) }}
+                        {{ form_row(form.comment) }}
+                        <div class="grid gap-2">
+                            <button type="submit" name="decision" value="approve" class="btn btn-primary w-full py-3">{{ icons.icon('check', 'size-5') }} {{ ('review.approve.' ~ request.type.value)|trans }}</button>
+                            <button type="submit" name="decision" value="reject" class="btn btn-danger w-full py-3">{{ icons.icon('x', 'size-5') }} {{ 'review.reject'|trans }}</button>
+                        </div>
+                    {{ form_end(form) }}
+                {% else %}
+                    <p class="text-sm text-muted">{{ 'review.cannot_review'|trans }}</p>
+                {% endif %}
+            </div>
+        </aside>
+    </div>
+</div>
+{% endblock %}

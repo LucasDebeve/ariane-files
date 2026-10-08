@@ -1,0 +1,31 @@
+{% extends 'admin/_layout.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ 'admin.folders.title'|trans }}{% endblock %}
+
+{% block admin_body %}
+<div class="flex flex-wrap items-end justify-between gap-4">
+    <h1 class="page-title">{{ 'admin.folders.title'|trans }}</h1>
+    <a href="{{ path('admin_folder_new') }}" class="btn btn-primary">{{ icons.icon('plus', 'size-4') }} {{ 'admin.folders.new'|trans }}</a>
+</div>
+<div class="mt-6">
+    {% if folders is empty %}
+        {{ ui.empty_state('folders.empty'|trans) }}
+    {% else %}
+        <ul class="grid gap-2">
+            {% for folder in folders %}
+                <li class="card flex flex-wrap items-center gap-3 px-4 py-3" style="margin-left: {{ folder.depth * 1.5 }}rem">
+                    <span class="flex size-10 items-center justify-center rounded-full {{ folder.depth == 0 ? 'bg-sun/50' : 'bg-cream-deep' }}">{{ icons.icon('folder', 'size-5') }}</span>
+                    <span class="min-w-0 flex-1"><span class="block truncate font-bold">{{ folder.name }}</span><span class="block text-xs text-muted">/{{ folder.slug }}</span></span>
+                    <span class="pill">{{ 'folder.documents'|trans({'%count%': counts[folder.id] ?? 0}) }}</span>
+                    <a class="btn btn-ghost py-2" href="{{ path('admin_folder_edit', {id: folder.id}) }}">{{ icons.icon('edit', 'size-4') }} {{ 'admin.folders.edit'|trans }}</a>
+                    {% if folder.children is empty and (counts[folder.id] ?? 0) == 0 and folder.documents is empty %}
+                        {{ ui.csrf_post(path('admin_folder_delete', {id: folder.id}), 'folder_delete_' ~ folder.id, 'admin.folders.delete'|trans, 'btn btn-danger py-2', 'trash', 'admin.folders.delete_confirm'|trans) }}
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

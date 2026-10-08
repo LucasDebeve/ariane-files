@@ -1,0 +1,429 @@
+app:
+    tagline: 'Le drive des formateurs BAFA/BAFD'
+
+nav:
+    skip: 'Aller au contenu'
+    home: 'Accueil'
+    home_label: '%app%, retour à l''accueil'
+    documents: 'Documents'
+    folders: 'Dossiers'
+    propose: 'Proposer'
+    certified: 'Espace certifié'
+    pending: '{0}Aucune validation en attente|{1}1 validation en attente|]1,Inf[%count% validations en attente'
+    notifications: '{0}Notifications : aucune proposition en attente|{1}Notifications : 1 proposition en attente|]1,Inf[Notifications : %count% propositions en attente'
+    admin: 'Administration'
+    account: 'Mon compte'
+    logout: 'Se déconnecter'
+    login: 'Se connecter'
+    menu: 'Menu'
+    main: 'Navigation principale'
+
+footer:
+    text: '%app% · drive souverain des formateurs BAFA/BAFD'
+    leave: 'Quitter (oublier le code)'
+    become_certified: 'Devenir utilisateur certifié'
+
+flash:
+    close: 'Fermer'
+
+breadcrumb:
+    label: 'Fil d''Ariane'
+
+pagination:
+    label: 'Pagination'
+    previous: 'Précédent'
+    next: 'Suivant'
+    status: 'Page %page% sur %count%'
+
+form:
+    optional: 'facultatif'
+    cancel: 'Annuler'
+    save: 'Enregistrer'
+    file:
+        choose: 'Choisir un fichier ou le glisser ici'
+
+access:
+    title: 'Code d''accès'
+    hero_title: 'Bienvenue sur Ariane'
+    hero_subtitle: 'Le fil qui relie les formateurs : tous les documents BAFA/BAFD, au même endroit.'
+    form_title: 'Saisissez le code de partage'
+    not_configured: 'Aucun code de partage n''a encore été défini. L''administrateur doit en générer un.'
+    submit: 'Accéder aux documents'
+    certified: 'Utilisateur certifié ?'
+    form:
+        code: 'Code de partage'
+        placeholder: 'XXXX-XXXX-XXXX'
+    flash:
+        invalid: 'Ce code n''est pas valide.'
+        too_many_attempts: 'Trop de tentatives. Réessayez dans quelques minutes.'
+
+search:
+    label: 'Rechercher un document'
+    placeholder: 'Titre, mot-clé ou contenu'
+    submit: 'Rechercher'
+    folder: 'Dossier'
+    all_folders: 'Tous les dossiers'
+
+home:
+    title: 'Accueil'
+    badge: '{0}Aucun document pour l''instant|{1}1 document partagé|]1,Inf[%count% documents partagés'
+    hero_title: 'Trouvez la bonne ressource de formation en un instant'
+    hero_subtitle: 'Fiches, diaporamas, grilles d''évaluation : la bibliothèque commune des formateurs.'
+    or: 'Vous pouvez aussi'
+    propose: 'Proposer un document'
+    suggestions: 'Recherches suggérées'
+    latest: 'Ajouts récents'
+    latest_subtitle: 'Les derniers documents validés par l''équipe.'
+    see_all: 'Tout voir'
+    empty: 'La bibliothèque est encore vide'
+    empty_text: 'Soyez la première personne à partager un document avec les autres formateurs.'
+    folders: 'Parcourir les dossiers'
+    all_folders: 'Tous les dossiers'
+
+folder:
+    root: 'Sans dossier'
+    subfolders: '{0}Aucun sous-dossier|{1}1 sous-dossier|]1,Inf[%count% sous-dossiers'
+    documents: '{0}vide|{1}1 document|]1,Inf[%count% documents'
+
+folders:
+    title: 'Dossiers'
+    subtitle: 'Tous les documents, rangés par thème.'
+    empty: 'Aucun dossier pour le moment.'
+    unfiled: 'Documents sans dossier'
+    search_here: 'Rechercher ici'
+    download_all: 'Tout télécharger (ZIP)'
+    subfolders: 'Sous-dossiers'
+    documents: '{0}Aucun document|{1}1 document|]1,Inf[%count% documents'
+    no_documents: 'Ce dossier ne contient pas encore de document.'
+
+documents:
+    title: 'Documents'
+    subtitle: 'Recherchez par titre, mot-clé ou contenu des fichiers.'
+    search_title: 'Recherche « %q% »'
+    results: '{0}Aucun résultat|{1}1 document|]1,Inf[%count% documents'
+    for: 'pour « %q% »'
+    remove_filter: 'Retirer ce filtre'
+    tags: 'Mots-clés'
+    select_all: 'Tout sélectionner'
+    selected: 'sélectionné(s)'
+    download_zip: 'Télécharger en ZIP'
+    empty: 'Aucun document ne correspond'
+    empty_text: 'Essayez un autre mot-clé, retirez un filtre… ou proposez le document qui manque.'
+
+document:
+    select: 'Sélectionner « %title% »'
+    downloads: '{0}0 téléchargement|{1}1 téléchargement|]1,Inf[%count% téléchargements'
+    preview: 'Aperçu'
+    preview_loading: 'Chargement de l''aperçu…'
+    preview_error: 'L''aperçu n''a pas pu être affiché. Vous pouvez télécharger le fichier.'
+    preview_pending: 'L''aperçu est en cours de génération. Revenez dans quelques instants.'
+    preview_none: 'Pas d''aperçu disponible pour ce format.'
+    image_alt: 'Aperçu de « %title% »'
+    open_video: 'Voir la vidéo sur %platform%'
+    download: 'Télécharger'
+    file: 'Fichier'
+    size: 'Taille'
+    folder: 'Dossier'
+    downloads_label: 'Téléchargements'
+    updated: 'Mis à jour le'
+    improve: 'Une erreur, une nouvelle version ?'
+    pending_changes: '{1}Une proposition est déjà en attente pour ce document.|]1,Inf[%count% propositions sont déjà en attente pour ce document.'
+    propose_edit: 'Proposer une modification'
+    propose_delete: 'Proposer la suppression'
+
+zip:
+    error:
+        empty: 'Aucun fichier à archiver.'
+        too_large: 'L''archive dépasserait la limite (200 fichiers ou 1 Go). Sélectionnez moins de documents.'
+        rate_limited: 'Trop d''archives demandées. Réessayez plus tard.'
+
+proposal:
+    title:
+        ajout: 'Proposer un document'
+        modification: 'Proposer une modification'
+        suppression: 'Proposer une suppression'
+    intro: 'Votre proposition sera publiée après validation par un formateur certifié. Vous ne recevrez pas de notification : indiquez simplement votre nom.'
+    deletion_notice: 'Ce document sera placé à la corbeille si la suppression est validée.'
+    submit: 'Envoyer la proposition'
+    rate_limited: 'Vous avez envoyé trop de propositions. Réessayez dans une heure.'
+    proposer_name:
+        required: 'Indiquez votre nom.'
+    reason:
+        required: 'Expliquez pourquoi ce document doit être supprimé.'
+    video:
+        https: 'Le lien vidéo doit commencer par https://'
+    form:
+        proposer_name: 'Votre nom'
+        proposer_name_help: 'Visible par les validateurs uniquement.'
+        title: 'Titre'
+        description: 'Description'
+        folder: 'Dossier'
+        tags: 'Mots-clés'
+        tags_help: 'Séparés par des virgules (10 maximum).'
+        tags_placeholder: 'grand jeu, sécurité, veillée'
+        content: 'Contenu'
+        content_unchanged: 'Laissez vide pour conserver le fichier actuel.'
+        file: 'Fichier'
+        replace_file: 'Nouveau fichier'
+        file_help: 'PDF, Word, PowerPoint, Excel, OpenDocument, images ou texte · %max% Mo maximum.'
+        or: 'ou'
+        video_url: 'Lien vers une vidéo'
+        video_url_help: 'Les vidéos ne sont pas hébergées : partagez un lien (YouTube, Vimeo, PeerTube…).'
+        deletion_reason: 'Motif de la suppression'
+        modification_reason: 'Que change cette modification ?'
+    thanks:
+        title: 'Merci pour votre proposition !'
+        text: 'Elle sera examinée par un formateur certifié avant publication.'
+        home: 'Retour à l''accueil'
+        again: 'Proposer un autre document'
+
+upload:
+    error:
+        unreadable: 'Le fichier n''a pas pu être lu.'
+        empty: 'Le fichier est vide.'
+        too_large: 'Le fichier dépasse la taille maximale de %max% Mo.'
+        format: 'Ce format n''est pas accepté. Formats autorisés : PDF, Word, PowerPoint, Excel, OpenDocument, images (JPEG, PNG, GIF, WebP) et texte.'
+        signature: 'Le contenu du fichier ne correspond pas à son extension.'
+        infected: 'Le fichier a été bloqué par l''antivirus.'
+        scanner_unavailable: 'L''analyse antivirus est momentanément indisponible. Réessayez plus tard.'
+        quarantine_full: 'Trop de propositions sont en attente de validation. Réessayez dans quelques jours.'
+
+captcha:
+    invalid: 'Merci de valider la vérification anti-robot.'
+
+login:
+    title: 'Connexion'
+    subtitle: 'Réservée aux formateurs certifiés.'
+    email: 'Adresse e-mail'
+    password: 'Mot de passe'
+    submit: 'Se connecter'
+    no_account: 'Pas encore de compte ?'
+    register: 'Demander un compte certifié'
+
+registration:
+    title: 'Devenir certifié'
+    subtitle: 'Les comptes certifiés valident les propositions. Chaque inscription est approuvée par l''administrateur.'
+    submit: 'Envoyer ma demande'
+    rate_limited: 'Trop de demandes depuis votre connexion. Réessayez plus tard.'
+    form:
+        display_name: 'Nom affiché'
+        display_name_help: 'Prénom et nom, visibles des autres formateurs certifiés.'
+        email: 'Adresse e-mail'
+        password: 'Mot de passe'
+        password_help: '12 caractères minimum. Une phrase de passe est idéale.'
+        password_repeat: 'Confirmez le mot de passe'
+    done:
+        title: 'Demande envoyée'
+        text: 'Votre compte sera activé après approbation par l''administrateur. À votre première connexion, vous configurerez la double authentification.'
+
+twofactor:
+    login:
+        title: 'Double authentification'
+        subtitle: 'Saisissez le code à 6 chiffres affiché par votre application.'
+        code: 'Code de vérification'
+        submit: 'Valider'
+        cancel: 'Annuler et se déconnecter'
+    setup:
+        title: 'Activer la double authentification'
+        intro: 'Obligatoire pour les comptes certifiés : elle protège la validation des documents.'
+        qr_alt: 'QR code à scanner avec votre application d''authentification'
+        manual: 'Saisie manuelle de la clé'
+        step1: 'Installez une application d''authentification (Aegis, FreeOTP, 2FAS, Google Authenticator…).'
+        step2: 'Scannez le QR code, ou saisissez la clé manuellement.'
+        step3: 'Entrez le code à 6 chiffres généré pour confirmer.'
+        code: 'Code à 6 chiffres'
+        code_format: 'Le code comporte 6 chiffres.'
+        submit: 'Activer'
+        invalid: 'Ce code n''est pas valide. Vérifiez l''heure de votre téléphone et réessayez.'
+        done: 'Double authentification activée.'
+
+certified:
+    title: 'Espace certifié'
+    subtitle: 'Validez ou refusez les propositions des formateurs.'
+    pending: 'Propositions en attente'
+    pending_count: '{0}Aucune proposition en attente|{1}1 proposition en attente|]1,Inf[%count% propositions en attente'
+    nothing: 'Tout est à jour, aucune proposition en attente.'
+    proposed_by: 'Proposé par %name% le %date%'
+    review: 'Examiner'
+    history: 'Dernières décisions'
+    col:
+        type: 'Type'
+        document: 'Document'
+        decision: 'Décision'
+        reviewer: 'Validateur'
+
+change_request:
+    type:
+        ajout: 'Ajout'
+        modification: 'Modification'
+        suppression: 'Suppression'
+    status:
+        en_attente: 'En attente'
+        validee: 'Validée'
+        refusee: 'Refusée'
+
+review:
+    title: 'Examiner une proposition'
+    heading:
+        ajout: 'Proposition d''ajout'
+        modification: 'Proposition de modification'
+        suppression: 'Proposition de suppression'
+    current_document: 'Document concerné'
+    not_published: 'n''est plus publié'
+    document_gone: 'Le document concerné a été supprimé définitivement.'
+    reason: 'Motif'
+    proposed_values: 'Valeurs proposées'
+    download_file: 'Télécharger'
+    file_checked: 'Format vérifié et analysé par l''antivirus.'
+    reviewed_by: 'Par %name% le %date%'
+    own_proposal: 'Vous avez fait cette proposition : un autre formateur certifié doit la valider.'
+    cannot_review: 'Vous ne pouvez pas valider cette proposition.'
+    decision: 'Votre décision'
+    approve:
+        ajout: 'Valider et publier'
+        modification: 'Valider la modification'
+        suppression: 'Valider la suppression'
+    reject: 'Refuser'
+    comment_required: 'Un commentaire est obligatoire pour refuser une proposition.'
+    form:
+        comment: 'Commentaire'
+        comment_help: 'Obligatoire en cas de refus.'
+    flash:
+        approved: 'Proposition validée.'
+        rejected: 'Proposition refusée.'
+        conflict: 'Cette proposition ne peut plus être traitée (déjà examinée ou document modifié entre-temps).'
+
+user:
+    email:
+        taken: 'Un compte existe déjà avec cette adresse.'
+    status:
+        en_attente: 'En attente'
+        actif: 'Actif'
+        desactive: 'Désactivé'
+
+admin:
+    title: 'Administration'
+    nav:
+        dashboard: 'Statistiques'
+        users: 'Utilisateurs'
+        share_code: 'Code de partage'
+        folders: 'Dossiers'
+        trash: 'Corbeille'
+        audit: 'Journal'
+    dashboard:
+        title: 'Tableau de bord'
+        documents: 'Documents publiés'
+        downloads: 'Téléchargements'
+        last_30_days: '30 derniers jours'
+        pending_requests: 'Propositions'
+        to_review: 'à examiner'
+        pending_users: 'Inscriptions'
+        to_approve: 'à approuver'
+        daily: 'Téléchargements par jour'
+        daily_label: '%count% téléchargements sur les 30 derniers jours'
+        storage: 'Stockage'
+        stored: 'Fichiers publiés et corbeille'
+        quarantine: 'Quarantaine'
+        top: 'Documents les plus téléchargés (30 jours)'
+        no_downloads: 'Aucun téléchargement sur la période.'
+    users:
+        title: 'Utilisateurs certifiés'
+        subtitle: 'Les inscriptions sont ouvertes mais doivent être approuvées.'
+        admin: 'admin'
+        approve: 'Approuver'
+        disable: 'Désactiver'
+        disable_confirm: 'Désactiver ce compte ?'
+        enable: 'Réactiver'
+        reset_2fa: 'Réinitialiser la 2FA'
+        reset_2fa_confirm: 'La personne devra reconfigurer sa double authentification. Continuer ?'
+        2fa_on: 'Activée'
+        2fa_off: 'À configurer'
+        col:
+            user: 'Utilisateur'
+            status: 'Statut'
+            2fa: 'Double authentification'
+            created: 'Inscription'
+            actions: 'Actions'
+        flash:
+            self: 'Vous ne pouvez pas modifier votre propre compte ici.'
+            approuver: 'Compte approuvé.'
+            desactiver: 'Compte désactivé.'
+            reactiver: 'Compte réactivé.'
+            reinitialiser-2fa: 'Double authentification réinitialisée.'
+    share_code:
+        title: 'Code de partage'
+        subtitle: 'Le code commun donne accès à la consultation et aux propositions. Il est stocké haché : il ne peut être affiché qu''au moment de sa création.'
+        new_code: 'Nouveau code de partage'
+        copy: 'Copier'
+        copied: 'Copié !'
+        shown_once: 'Notez-le maintenant : il ne sera plus affiché.'
+        last_rotation: 'Dernier changement'
+        none: 'Aucun code défini'
+        rotate: 'Générer un nouveau code'
+        confirm: 'L''ancien code cessera immédiatement de fonctionner. Continuer ?'
+        warning: 'Tous les visiteurs devront saisir le nouveau code.'
+    folders:
+        title: 'Dossiers'
+        new: 'Nouveau dossier'
+        edit: 'Modifier'
+        edit_title: 'Modifier « %name% »'
+        delete: 'Supprimer'
+        delete_confirm: 'Supprimer ce dossier vide ?'
+        form:
+            name: 'Nom'
+            parent: 'Dossier parent'
+        flash:
+            saved: 'Dossier enregistré.'
+            deleted: 'Dossier supprimé.'
+            not_empty: 'Seul un dossier vide peut être supprimé.'
+    trash:
+        title: 'Corbeille'
+        subtitle: 'Les documents supprimés sont conservés %days% jours avant d''être purgés définitivement.'
+        empty: 'La corbeille est vide.'
+        deleted_at: 'Supprimé le %date% · purge le %purge%'
+        restore: 'Restaurer'
+        purge: 'Purger'
+        purge_confirm: 'Supprimer définitivement ce document ? Cette action est irréversible.'
+        flash:
+            restored: 'Document restauré.'
+            purged: 'Document supprimé définitivement.'
+    audit:
+        title: 'Journal d''audit'
+        subtitle: 'Toutes les actions sensibles : validations, refus, suppressions, rotation du code, comptes.'
+        empty: 'Aucune entrée.'
+        col:
+            date: 'Date'
+            actor: 'Acteur'
+            action: 'Action'
+            details: 'Détails'
+
+audit:
+    change_request.submitted: 'Proposition envoyée'
+    change_request.approved: 'Proposition validée'
+    change_request.rejected: 'Proposition refusée'
+    document.trashed: 'Document mis à la corbeille'
+    document.restored: 'Document restauré'
+    document.purged: 'Document purgé'
+    share_code.rotated: 'Code de partage changé'
+    upload.infected: 'Fichier infecté bloqué'
+    user.registered: 'Inscription'
+    user.approuver: 'Compte approuvé'
+    user.desactiver: 'Compte désactivé'
+    user.reactiver: 'Compte réactivé'
+    user.reinitialiser-2fa: '2FA réinitialisée'
+    user.2fa_enabled: '2FA activée'
+    folder.created: 'Dossier créé'
+    folder.updated: 'Dossier modifié'
+    folder.deleted: 'Dossier supprimé'
+
+error:
+    home: 'Retour à l''accueil'
+    403:
+        title: 'Accès refusé'
+        text: 'Vous n''avez pas les droits nécessaires pour cette page.'
+    404:
+        title: 'Page introuvable'
+        text: 'Ce document ou cette page n''existe pas (ou plus).'
+    generic:
+        title: 'Une erreur est survenue'
+        text: 'Le problème a été enregistré. Réessayez dans quelques instants.'

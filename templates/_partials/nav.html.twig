@@ -1,0 +1,70 @@
+{% import 'macros/icons.html.twig' as icons %}
+{% set route = app.current_route ?? '' %}
+{% set pending = pending_reviews_count() %}
+{% set links = [
+    {route: 'home', label: 'nav.home', active: route == 'home', icon: 'home'},
+    {route: 'document_index', label: 'nav.documents', active: route starts with 'document_', icon: 'file'},
+    {route: 'folder_index', label: 'nav.folders', active: route starts with 'folder_', icon: 'folder'},
+    {route: 'proposal_add', label: 'nav.propose', active: route starts with 'proposal_', icon: 'upload'},
+] %}
+<header class="sticky top-0 z-40 border-b border-line/60 bg-cream/85 backdrop-blur-md" data-controller="menu" data-action="keydown@window->menu#close">
+    <div class="mx-auto flex max-w-7xl items-center gap-3 px-4 py-3 sm:px-6 lg:px-8">
+        <a href="{{ path('home') }}" class="mr-2 flex items-center gap-2.5 rounded-full pr-2" aria-label="{{ 'nav.home_label'|trans({'%app%': app_name}) }}">
+            {{ icons.logo('size-9') }}
+            <span class="text-xl font-extrabold tracking-tight">{{ app_name }}</span>
+        </a>
+
+        {% if is_granted('SHARE_ACCESS') %}
+        <nav class="hidden items-center gap-1 rounded-full bg-cream-deep/80 p-1 lg:flex" aria-label="{{ 'nav.main'|trans }}">
+            {% for link in links %}
+                <a href="{{ path(link.route) }}" class="nav-link" {% if link.active %}aria-current="page"{% endif %}>{{ link.label|trans }}</a>
+            {% endfor %}
+            <a href="{{ path('certified_index') }}" class="nav-link" {% if route starts with 'certified_' %}aria-current="page"{% endif %}>
+                {{ 'nav.certified'|trans }}
+                {% if pending > 0 %}<span class="size-2.5 rounded-full bg-action ring-2 ring-white"><span class="sr-only">{{ 'nav.pending'|trans({'%count%': pending}) }}</span></span>{% endif %}
+            </a>
+        </nav>
+        {% endif %}
+
+        <div class="ml-auto flex items-center gap-2">
+            {% if app.user %}
+                <a href="{{ path('certified_index') }}" class="relative flex size-10 items-center justify-center rounded-full bg-white text-ink shadow-soft hover:bg-cream-deep" aria-label="{{ 'nav.notifications'|trans({'%count%': pending}) }}">
+                    {{ icons.icon('bell', 'size-5') }}
+                    {% if pending > 0 %}
+                        <span class="absolute -right-0.5 -top-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-action px-1 text-[0.7rem] font-bold text-ink ring-2 ring-cream">{{ pending > 99 ? '99+' : pending }}</span>
+                    {% endif %}
+                </a>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin_dashboard') }}" class="hidden size-10 items-center justify-center rounded-full bg-white text-ink shadow-soft hover:bg-cream-deep sm:flex" aria-label="{{ 'nav.admin'|trans }}" title="{{ 'nav.admin'|trans }}">{{ icons.icon('chart', 'size-5') }}</a>
+                {% endif %}
+                <details class="relative">
+                    <summary class="flex size-10 cursor-pointer list-none items-center justify-center rounded-full bg-ink text-sm font-bold text-white [&::-webkit-details-marker]:hidden" aria-label="{{ 'nav.account'|trans }}">{{ app.user.initials }}</summary>
+                    <div class="card absolute right-0 mt-2 w-64 p-2">
+                        <p class="px-3 py-2 text-sm"><span class="block font-bold">{{ app.user.displayName }}</span><span class="block truncate text-muted">{{ app.user.email }}</span></p>
+                        {% if is_granted('ROLE_ADMIN') %}<a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold hover:bg-cream-deep" href="{{ path('admin_dashboard') }}">{{ icons.icon('chart', 'size-4') }} {{ 'nav.admin'|trans }}</a>{% endif %}
+                        <a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold hover:bg-cream-deep" href="{{ path('certified_index') }}">{{ icons.icon('shield', 'size-4') }} {{ 'nav.certified'|trans }}</a>
+                        <a class="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-[#b3261e] hover:bg-coral/10" href="{{ logout_path() }}" data-turbo="false">{{ icons.icon('logout', 'size-4') }} {{ 'nav.logout'|trans }}</a>
+                    </div>
+                </details>
+            {% else %}
+                <a href="{{ path('app_login') }}" class="btn btn-ghost hidden sm:inline-flex">{{ icons.icon('user', 'size-4') }} {{ 'nav.login'|trans }}</a>
+            {% endif %}
+            {% if is_granted('SHARE_ACCESS') %}
+            <button type="button" class="flex size-10 items-center justify-center rounded-full bg-white shadow-soft lg:hidden" data-menu-target="button" data-action="menu#toggle" aria-expanded="false" aria-controls="mobile-menu">
+                {{ icons.icon('menu', 'size-5') }}<span class="sr-only">{{ 'nav.menu'|trans }}</span>
+            </button>
+            {% endif %}
+        </div>
+    </div>
+    {% if is_granted('SHARE_ACCESS') %}
+    <nav id="mobile-menu" class="border-t border-line/60 px-4 pb-4 pt-2 lg:hidden" data-menu-target="panel" hidden aria-label="{{ 'nav.main'|trans }}">
+        <ul class="grid gap-1">
+            {% for link in links %}
+                <li><a href="{{ path(link.route) }}" class="nav-link w-full" {% if link.active %}aria-current="page"{% endif %}>{{ icons.icon(link.icon, 'size-4') }} {{ link.label|trans }}</a></li>
+            {% endfor %}
+            <li><a href="{{ path('certified_index') }}" class="nav-link w-full" {% if route starts with 'certified_' %}aria-current="page"{% endif %}>{{ icons.icon('shield', 'size-4') }} {{ 'nav.certified'|trans }}{% if pending > 0 %}<span class="ml-auto rounded-full bg-action px-2 text-xs font-bold">{{ pending }}</span>{% endif %}</a></li>
+            {% if not app.user %}<li><a href="{{ path('app_login') }}" class="nav-link w-full">{{ icons.icon('user', 'size-4') }} {{ 'nav.login'|trans }}</a></li>{% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</header>

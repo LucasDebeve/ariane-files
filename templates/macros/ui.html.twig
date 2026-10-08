@@ -1,0 +1,85 @@
+{% import 'macros/icons.html.twig' as icons %}
+
+{# Round format badge (PDF, DOC, PPT, XLS, IMG, TXT, VID). #}
+{% macro file_badge(family, size = 'size-12') %}
+{%- set styles = {
+    pdf: 'bg-[#ffe3dd] text-[#b3261e]',
+    doc: 'bg-[#dfeaff] text-[#1d4ed8]',
+    ppt: 'bg-[#ffe9d1] text-[#b45309]',
+    xls: 'bg-[#d9f7e8] text-[#00733c]',
+    img: 'bg-[#efe3ff] text-[#6d28d9]',
+    txt: 'bg-[#eceaf3] text-[#4b4869]',
+    video: 'bg-[#fff1c2] text-[#8a5a00]',
+} -%}
+{%- set labels = {pdf: 'PDF', doc: 'DOC', ppt: 'PPT', xls: 'XLS', img: 'IMG', txt: 'TXT', video: 'VID'} -%}
+<span class="{{ size }} {{ styles[family] ?? styles.txt }} inline-flex shrink-0 items-center justify-center rounded-full text-[0.68rem] font-extrabold tracking-wide" aria-hidden="true">{{ labels[family] ?? 'DOC' }}</span>
+{%- endmacro %}
+
+{% macro document_card(document, selectable = false) %}
+{% import 'macros/icons.html.twig' as icons %}
+{% import _self as ui %}
+<article class="card group relative flex h-full flex-col gap-4 p-5 transition hover:-translate-y-0.5 hover:shadow-lift">
+    <div class="flex items-start gap-4">
+        {{ ui.file_badge(document.videoLink ? 'video' : document.mimeType|file_family) }}
+        <div class="min-w-0 flex-1">
+            <h3 class="line-clamp-2 text-base font-bold leading-snug text-ink">
+                <a href="{{ path('document_show', {id: document.id}) }}" class="after:absolute after:inset-0 after:rounded-[var(--radius-card)] focus-visible:outline-none">{{ document.title }}</a>
+            </h3>
+            <p class="mt-1 flex items-center gap-1.5 truncate text-sm text-muted">
+                {{ icons.icon('folder', 'size-4 shrink-0') }}
+                <span class="truncate">{{ document.folder ? document.folder.path : 'folder.root'|trans }}</span>
+            </p>
+        </div>
+        {% if selectable and not document.videoLink %}
+            <label class="relative z-10 -m-1 p-1">
+                <span class="sr-only">{{ 'document.select'|trans({'%title%': document.title}) }}</span>
+                <input type="checkbox" name="ids[]" value="{{ document.id }}" form="zip-form" class="size-5 rounded-md border-line accent-[var(--color-action-dark)]" data-selection-target="checkbox" data-action="selection#update">
+            </label>
+        {% endif %}
+    </div>
+    <div class="mt-auto flex flex-wrap items-center gap-2">
+        {% if document.videoLink %}
+            <span class="pill">{{ icons.icon('video', 'size-3.5') }} {{ document.externalUrl|video_platform }}</span>
+        {% else %}
+            <span class="pill">{{ document.size|bytes }}</span>
+        {% endif %}
+        <span class="pill">{{ icons.icon('download', 'size-3.5') }} {{ 'document.downloads'|trans({'%count%': document.downloadCount}) }}</span>
+        {% for tag in document.tags|slice(0, 2) %}
+            <span class="pill bg-white ring-1 ring-line">#{{ tag.name }}</span>
+        {% endfor %}
+    </div>
+</article>
+{% endmacro %}
+
+{% macro pagination(page, pageCount, route, params) %}
+{% import 'macros/icons.html.twig' as icons %}
+{% if pageCount > 1 %}
+<nav class="mt-10 flex items-center justify-center gap-2" aria-label="{{ 'pagination.label'|trans }}">
+    {% if page > 1 %}
+        <a class="btn btn-ghost" href="{{ path(route, params|merge({page: page - 1})) }}" rel="prev">{{ icons.icon('back', 'size-4') }} {{ 'pagination.previous'|trans }}</a>
+    {% endif %}
+    <span class="px-3 text-sm font-semibold text-muted">{{ 'pagination.status'|trans({'%page%': page, '%count%': pageCount}) }}</span>
+    {% if page < pageCount %}
+        <a class="btn btn-ghost" href="{{ path(route, params|merge({page: page + 1})) }}" rel="next">{{ 'pagination.next'|trans }} {{ icons.icon('arrow', 'size-4') }}</a>
+    {% endif %}
+</nav>
+{% endif %}
+{% endmacro %}
+
+{% macro empty_state(title, text = null, action = null) %}
+{% import 'macros/icons.html.twig' as icons %}
+<div class="card flex flex-col items-center gap-3 px-6 py-14 text-center">
+    <span class="flex size-14 items-center justify-center rounded-full bg-cream-deep text-muted">{{ icons.icon('search', 'size-6') }}</span>
+    <p class="text-lg font-bold">{{ title }}</p>
+    {% if text %}<p class="max-w-md text-muted">{{ text }}</p>{% endif %}
+    {% if action %}{{ action|raw }}{% endif %}
+</div>
+{% endmacro %}
+
+{% macro csrf_post(url, token_id, label, class = 'btn btn-ghost', icon = null, confirm = null) %}
+{% import 'macros/icons.html.twig' as icons %}
+<form method="post" action="{{ url }}" class="inline" {% if confirm %}data-turbo-confirm="{{ confirm }}"{% endif %}>
+    <input type="hidden" name="_token" value="{{ csrf_token(token_id) }}">
+    <button type="submit" class="{{ class }}">{% if icon %}{{ icons.icon(icon, 'size-4') }}{% endif %}{{ label }}</button>
+</form>
+{% endmacro %}

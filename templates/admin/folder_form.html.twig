@@ -1,0 +1,18 @@
+{% extends 'admin/_layout.html.twig' %}
+
+{% block title %}{{ folder.id ? 'admin.folders.edit'|trans : 'admin.folders.new'|trans }}{% endblock %}
+
+{% block admin_body %}
+<h1 class="page-title">{{ folder.id ? 'admin.folders.edit_title'|trans({'%name%': folder.name}) : 'admin.folders.new'|trans }}</h1>
+<div class="card mt-6 max-w-2xl p-6 sm:p-8">
+    {{ form_start(form, {attr: {novalidate: 'novalidate'}}) }}
+        {{ form_errors(form) }}
+        {{ form_row(form.name) }}
+        {{ form_row(form.parent) }}
+        <div class="flex justify-end gap-3">
+            <a href="{{ path('admin_folders') }}" class="btn btn-ghost">{{ 'form.cancel'|trans }}</a>
+            <button type="submit" class="btn btn-primary">{{ 'form.save'|trans }}</button>
+        </div>
+    {{ form_end(form) }}
+</div>
+{% endblock %}

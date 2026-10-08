@@ -1,0 +1,54 @@
+{% extends 'admin/_layout.html.twig' %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ 'admin.users.title'|trans }}{% endblock %}
+
+{% block admin_body %}
+<h1 class="page-title">{{ 'admin.users.title'|trans }}</h1>
+<p class="mt-2 text-muted">{{ 'admin.users.subtitle'|trans }}</p>
+<div class="card mt-6 overflow-x-auto">
+    <table class="w-full min-w-[48rem] text-left text-sm">
+        <thead class="text-muted">
+            <tr class="border-b border-line">
+                <th scope="col" class="px-5 py-3 font-semibold">{{ 'admin.users.col.user'|trans }}</th>
+                <th scope="col" class="px-5 py-3 font-semibold">{{ 'admin.users.col.status'|trans }}</th>
+                <th scope="col" class="px-5 py-3 font-semibold">{{ 'admin.users.col.2fa'|trans }}</th>
+                <th scope="col" class="px-5 py-3 font-semibold">{{ 'admin.users.col.created'|trans }}</th>
+                <th scope="col" class="px-5 py-3 font-semibold"><span class="sr-only">{{ 'admin.users.col.actions'|trans }}</span></th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for user in users %}
+            {% set styles = {en_attente: 'bg-sun/40 text-[#7a4f00]', actif: 'bg-action/15 text-action-ink', desactive: 'bg-cream-deep text-muted'} %}
+            <tr class="border-b border-line/60 last:border-0">
+                <td class="px-5 py-3">
+                    <span class="flex items-center gap-3">
+                        <span class="flex size-9 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">{{ user.initials }}</span>
+                        <span><span class="block font-semibold">{{ user.displayName }}{% if user.admin %} <span class="pill ml-1">{{ 'admin.users.admin'|trans }}</span>{% endif %}</span><span class="block text-muted">{{ user.email }}</span></span>
+                    </span>
+                </td>
+                <td class="px-5 py-3"><span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold {{ styles[user.status.value] }}">{{ user.status.label|trans }}</span></td>
+                <td class="px-5 py-3">{{ user.totpAuthenticationEnabled ? 'admin.users.2fa_on'|trans : 'admin.users.2fa_off'|trans }}</td>
+                <td class="px-5 py-3 text-muted">{{ user.createdAt|format_date('medium', locale: 'fr') }}</td>
+                <td class="px-5 py-3">
+                    {% if user != app.user %}
+                    <div class="flex flex-wrap justify-end gap-2">
+                        {% if user.status.value == 'en_attente' %}
+                            {{ ui.csrf_post(path('admin_user_action', {id: user.id, action: 'approuver'}), 'user_' ~ user.id, 'admin.users.approve'|trans, 'btn btn-primary py-2', 'check') }}
+                        {% elseif user.status.value == 'actif' %}
+                            {% if user.totpAuthenticationEnabled %}
+                                {{ ui.csrf_post(path('admin_user_action', {id: user.id, action: 'reinitialiser-2fa'}), 'user_' ~ user.id, 'admin.users.reset_2fa'|trans, 'btn btn-ghost py-2', null, 'admin.users.reset_2fa_confirm'|trans) }}
+                            {% endif %}
+                            {{ ui.csrf_post(path('admin_user_action', {id: user.id, action: 'desactiver'}), 'user_' ~ user.id, 'admin.users.disable'|trans, 'btn btn-danger py-2', null, 'admin.users.disable_confirm'|trans) }}
+                        {% else %}
+                            {{ ui.csrf_post(path('admin_user_action', {id: user.id, action: 'reactiver'}), 'user_' ~ user.id, 'admin.users.enable'|trans, 'btn btn-ghost py-2') }}
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

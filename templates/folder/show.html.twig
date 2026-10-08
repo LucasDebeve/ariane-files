@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ folder.name }}{% endblock %}
+
+{% block body %}
+<div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8" data-controller="selection">
+    <nav aria-label="{{ 'breadcrumb.label'|trans }}" class="mb-4 text-sm">
+        <ol class="flex flex-wrap items-center gap-1.5 text-muted">
+            <li><a class="hover:text-ink" href="{{ path('folder_index') }}">{{ 'nav.folders'|trans }}</a></li>
+            {% for ancestor in folder.ancestors %}
+                <li aria-hidden="true">/</li>
+                <li><a class="hover:text-ink" href="{{ path('folder_show', {slug: ancestor.slug}) }}">{{ ancestor.name }}</a></li>
+            {% endfor %}
+        </ol>
+    </nav>
+    <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div class="flex items-center gap-4">
+            <span class="flex size-14 items-center justify-center rounded-full bg-sun/50">{{ icons.icon('folder', 'size-7') }}</span>
+            <h1 class="page-title">{{ folder.name }}</h1>
+        </div>
+        <div class="flex flex-wrap gap-2">
+            <a class="btn btn-ghost" href="{{ path('document_index', {dossier: folder.slug}) }}">{{ icons.icon('search', 'size-4') }} {{ 'folders.search_here'|trans }}</a>
+            <a class="btn btn-dark" href="{{ path('folder_zip', {slug: folder.slug}) }}" data-turbo="false">{{ icons.icon('zip', 'size-4') }} {{ 'folders.download_all'|trans }}</a>
+        </div>
+    </div>
+
+    {% if folder.children is not empty %}
+        <h2 class="mt-10 text-lg font-extrabold">{{ 'folders.subfolders'|trans }}</h2>
+        <ul class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {% for child in folder.children %}
+                <li>
+                    <a href="{{ path('folder_show', {slug: child.slug}) }}" class="card flex items-center gap-3 px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-lift">
+                        <span class="flex size-10 items-center justify-center rounded-full bg-cream-deep">{{ icons.icon('folder', 'size-5') }}</span>
+                        <span class="min-w-0 flex-1 truncate font-bold">{{ child.name }}</span>
+                        <span class="pill">{{ counts[child.id] ?? 0 }}</span>
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="mt-10 flex items-center justify-between">
+        <h2 class="text-lg font-extrabold">{{ 'folders.documents'|trans({'%count%': documents|length}) }}</h2>
+        {% if documents is not empty %}
+            <label class="flex items-center gap-2 text-sm font-semibold text-ink-soft">
+                <input type="checkbox" class="size-5 rounded-md accent-[var(--color-action-dark)]" data-selection-target="all" data-action="selection#toggleAll">
+                {{ 'documents.select_all'|trans }}
+            </label>
+        {% endif %}
+    </div>
+    <div class="mt-4">
+        {% if documents is empty %}
+            {{ ui.empty_state('folders.no_documents'|trans, null, '<a class="btn btn-primary mt-2" href="' ~ path('proposal_add') ~ '">' ~ 'home.propose'|trans|e ~ '</a>') }}
+        {% else %}
+            <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {% for document in documents %}<li>{{ ui.document_card(document, true) }}</li>{% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    <form id="zip-form" method="post" action="{{ path('document_zip') }}" data-turbo="false">
+        <input type="hidden" name="_token" value="{{ csrf_token('document_zip') }}">
+        <div class="fixed inset-x-0 bottom-4 z-30 mx-auto flex w-fit items-center gap-4 rounded-full bg-ink py-2 pl-6 pr-2 text-white shadow-lift" data-selection-target="bar" hidden>
+            <p class="text-sm font-semibold"><span data-selection-target="count">0</span> {{ 'documents.selected'|trans }}</p>
+            <button type="submit" class="btn btn-primary">{{ icons.icon('zip', 'size-4') }} {{ 'documents.download_zip'|trans }}</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

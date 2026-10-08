@@ -1,0 +1,28 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+
+{% block title %}{{ 'login.title'|trans }}{% endblock %}
+
+{% block body %}
+{% set content %}
+    <h1 class="text-2xl font-extrabold">{{ 'login.title'|trans }}</h1>
+    <p class="mt-1 text-sm text-muted">{{ 'login.subtitle'|trans }}</p>
+    {% if error %}
+        <p class="mt-5 rounded-2xl bg-[#ffe3dd] px-4 py-3 text-sm font-semibold text-[#8c1d18]" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</p>
+    {% endif %}
+    <form method="post" action="{{ path('app_login') }}" class="mt-6" data-turbo="false">
+        <div class="mb-5">
+            <label for="email" class="field-label">{{ 'login.email'|trans }}</label>
+            <input type="email" id="email" name="email" value="{{ last_username }}" class="field-input" autocomplete="email" required autofocus>
+        </div>
+        <div class="mb-6">
+            <label for="password" class="field-label">{{ 'login.password'|trans }}</label>
+            <input type="password" id="password" name="password" class="field-input" autocomplete="current-password" required>
+        </div>
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit" class="btn btn-primary w-full py-3.5 text-base">{{ 'login.submit'|trans }}</button>
+    </form>
+    <p class="mt-6 text-center text-sm text-muted">{{ 'login.no_account'|trans }} <a class="font-bold text-ink underline decoration-action decoration-2 underline-offset-4" href="{{ path('app_register') }}">{{ 'login.register'|trans }}</a></p>
+{% endset %}
+{{ include('security/_card.html.twig', {icon: 'shield', content: content}) }}
+{% endblock %}

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="csp-nonce" content="{{ csp_nonce() }}">
+        <meta name="color-scheme" content="light">
+        <meta name="robots" content="noindex, nofollow">
+        <meta name="referrer" content="same-origin">
+        <title>{% block title %}{{ 'app.tagline'|trans }}{% endblock %} · {{ app_name }}</title>
+        <link rel="icon" href="{{ asset('images/favicon.svg') }}" type="image/svg+xml">
+        <link rel="stylesheet" href="{{ asset('styles/app.css') }}" data-turbo-track="reload">
+        {% block stylesheets %}{% endblock %}
+        {% block javascripts %}
+            {{ importmap('app', {nonce: csp_nonce()}) }}
+        {% endblock %}
+    </head>
+    <body class="min-h-dvh {% block body_class %}{% endblock %}">
+        <a href="#contenu" class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:bg-ink focus:px-4 focus:py-2 focus:text-white">{{ 'nav.skip'|trans }}</a>
+        {% block header %}{{ include('_partials/nav.html.twig') }}{% endblock %}
+        {{ include('_partials/flash.html.twig') }}
+        <main id="contenu" tabindex="-1" class="focus:outline-none">
+            {% block body %}{% endblock %}
+        </main>
+        {% block footer %}
+        <footer class="mx-auto mt-20 max-w-7xl px-4 pb-10 sm:px-6 lg:px-8">
+            <div class="flex flex-col items-center justify-between gap-3 border-t border-line pt-6 text-sm text-muted sm:flex-row">
+                <p>{{ 'footer.text'|trans({'%app%': app_name}) }}</p>
+                <div class="flex items-center gap-4">
+                    {% if is_granted('SHARE_ACCESS') and not app.user %}
+                        <form method="post" action="{{ path('access_leave') }}">
+                            <input type="hidden" name="_token" value="{{ csrf_token('access_leave') }}">
+                            <button type="submit" class="underline-offset-4 hover:underline">{{ 'footer.leave'|trans }}</button>
+                        </form>
+                    {% endif %}
+                    {% if not app.user %}<a class="underline-offset-4 hover:underline" href="{{ path('app_register') }}">{{ 'footer.become_certified'|trans }}</a>{% endif %}
+                </div>
+            </div>
+        </footer>
+        {% endblock %}
+    </body>
+</html>

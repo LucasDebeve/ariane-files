@@ -1,0 +1,57 @@
+{% use 'form_div_layout.html.twig' %}
+
+{%- block form_row -%}
+    {%- set row_attr = row_attr|merge({class: (row_attr.class|default('') ~ ' mb-5')|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_row -%}
+
+{%- block widget_attributes -%}
+    {%- set attr = attr|merge({class: (attr.class|default('field-input') ~ (errors|length ? ' border-[#b3261e] focus:border-[#b3261e]' : ''))|trim}) -%}
+    {{- parent() -}}
+{%- endblock widget_attributes -%}
+
+{%- block form_label -%}
+    {%- set label_attr = label_attr|merge({class: (label_attr.class|default('field-label'))|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_label -%}
+
+{%- block form_label_content -%}
+    {{- parent() -}}
+    {%- if not required and not compound -%} <span class="ml-1 font-normal text-muted">({{ 'form.optional'|trans }})</span>{%- endif -%}
+{%- endblock form_label_content -%}
+
+{%- block form_help -%}
+    {%- set help_attr = help_attr|merge({class: (help_attr.class|default('field-help'))|trim}) -%}
+    {{- parent() -}}
+{%- endblock form_help -%}
+
+{%- block form_errors -%}
+    {%- if errors|length > 0 -%}
+        <ul class="{{ compound ? 'mb-5 rounded-2xl bg-[#ffe3dd] px-4 py-3' : '' }}">
+            {%- for error in errors -%}
+                <li class="field-error">{{ error.message }}</li>
+            {%- endfor -%}
+        </ul>
+    {%- endif -%}
+{%- endblock form_errors -%}
+
+{%- block choice_widget_collapsed -%}
+    {%- set attr = attr|merge({class: (attr.class|default('field-input') ~ ' cursor-pointer pr-10')|trim}) -%}
+    {{- parent() -}}
+{%- endblock choice_widget_collapsed -%}
+
+{%- block file_widget -%}
+    <div class="relative" data-controller="file-input">
+        <label class="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-3xl border-2 border-dashed border-line bg-white px-6 py-8 text-center transition hover:border-action hover:bg-action/5 has-[:focus-visible]:border-action">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="size-8 text-action-dark" aria-hidden="true"><path d="M12 20V9"/><path d="m7 14 5-5 5 5"/><path d="M5 4h14"/></svg>
+            <span class="font-semibold text-ink" data-file-input-target="name" data-empty="{{ 'form.file.choose'|trans }}">{{ 'form.file.choose'|trans }}</span>
+            {%- set attr = attr|merge({class: 'sr-only', 'data-file-input-target': 'input', 'data-action': 'file-input#change'}) -%}
+            <input type="file" {{ block('widget_attributes') }}>
+        </label>
+    </div>
+{%- endblock file_widget -%}
+
+{%- block textarea_widget -%}
+    {%- set attr = attr|merge({class: (attr.class|default('field-input') ~ ' min-h-28')|trim}) -%}
+    {{- parent() -}}
+{%- endblock textarea_widget -%}

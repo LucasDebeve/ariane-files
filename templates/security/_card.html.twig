@@ -1,0 +1,9 @@
+{# Centered card layout used by login / registration / 2FA pages. #}
+{% import 'macros/icons.html.twig' as icons %}
+<div class="mx-auto max-w-md px-4 pt-10 sm:pt-16">
+    <div class="hero-mesh hero-mesh--compact h-28 rounded-b-none"></div>
+    <div class="card -mt-14 rounded-t-[var(--radius-card)] p-6 sm:p-8 relative">
+        <span class="-mt-14 mb-4 flex size-16 items-center justify-center rounded-full bg-white text-ink shadow-lift">{{ icons.icon(icon, 'size-7') }}</span>
+        {{ content|raw }}
+    </div>
+</div>

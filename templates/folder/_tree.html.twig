@@ -1,0 +1,12 @@
+{% import 'macros/icons.html.twig' as icons %}
+<ul class="grid gap-2">
+    {% for folder in folders %}
+        <li style="padding-left: {{ (folder.depth - baseDepth) * 1.5 }}rem">
+            <a href="{{ path('folder_show', {slug: folder.slug}) }}" class="card flex items-center gap-3 px-4 py-3 transition hover:-translate-y-0.5 hover:shadow-lift">
+                <span class="flex size-10 items-center justify-center rounded-full {{ folder.depth == 0 ? 'bg-sun/50' : 'bg-cream-deep' }}">{{ icons.icon('folder', 'size-5') }}</span>
+                <span class="min-w-0 flex-1 truncate font-bold">{{ folder.name }}</span>
+                <span class="pill">{{ 'folder.documents'|trans({'%count%': counts[folder.id] ?? 0}) }}</span>
+            </a>
+        </li>
+    {% endfor %}
+</ul>

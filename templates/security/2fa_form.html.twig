@@ -1,0 +1,25 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'twofactor.login.title'|trans }}{% endblock %}
+
+{% block body %}
+{% set content %}
+    <h1 class="text-2xl font-extrabold">{{ 'twofactor.login.title'|trans }}</h1>
+    <p class="mt-1 text-sm text-muted">{{ 'twofactor.login.subtitle'|trans }}</p>
+    {% if authenticationError %}
+        <p class="mt-5 rounded-2xl bg-[#ffe3dd] px-4 py-3 text-sm font-semibold text-[#8c1d18]" role="alert">{{ authenticationError|trans(authenticationErrorData, 'SchebTwoFactorBundle') }}</p>
+    {% endif %}
+    <form class="mt-6" action="{{ checkPathUrl ? checkPathUrl : path(checkPathRoute) }}" method="post" data-turbo="false">
+        <div class="mb-6">
+            <label for="_auth_code" class="field-label">{{ 'twofactor.login.code'|trans }}</label>
+            <input id="_auth_code" type="text" name="{{ authCodeParameterName }}" class="field-input text-center text-2xl font-bold tracking-[0.5em]" autocomplete="one-time-code" inputmode="numeric" pattern="[0-9]*" maxlength="6" autofocus required>
+        </div>
+        {% if isCsrfProtectionEnabled %}
+            <input type="hidden" name="{{ csrfParameterName }}" value="{{ csrf_token(csrfTokenId) }}">
+        {% endif %}
+        <button type="submit" class="btn btn-primary w-full py-3.5 text-base">{{ 'twofactor.login.submit'|trans }}</button>
+    </form>
+    <p class="mt-6 text-center text-sm"><a class="font-semibold text-muted hover:text-ink" href="{{ logoutPath }}" data-turbo="false">{{ 'twofactor.login.cancel'|trans }}</a></p>
+{% endset %}
+{{ include('security/_card.html.twig', {icon: 'lock', content: content}) }}
+{% endblock %}

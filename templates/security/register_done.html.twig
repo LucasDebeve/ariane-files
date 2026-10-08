@@ -1,0 +1,12 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'registration.done.title'|trans }}{% endblock %}
+
+{% block body %}
+{% set content %}
+    <h1 class="text-2xl font-extrabold">{{ 'registration.done.title'|trans }}</h1>
+    <p class="mt-3 text-muted">{{ 'registration.done.text'|trans }}</p>
+    <a href="{{ path('app_login') }}" class="btn btn-dark mt-6 w-full">{{ 'nav.login'|trans }}</a>
+{% endset %}
+{{ include('security/_card.html.twig', {icon: 'clock', content: content}) }}
+{% endblock %}

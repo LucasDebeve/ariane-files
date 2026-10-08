@@ -1,0 +1,96 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ 'home.title'|trans }}{% endblock %}
+
+{% block body %}
+<section class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8" aria-labelledby="hero-title">
+    <div class="hero-mesh px-6 pb-28 pt-16 text-center sm:px-10 sm:pb-36 sm:pt-24">
+        {# Floating bubbles: formats and popular tags. Decorative. #}
+        <div class="pointer-events-none absolute inset-0" aria-hidden="true">
+            <span class="bubble left-[6%] top-[14%] hidden size-20 sm:flex">{{ ui.file_badge('pdf', 'size-11 sm:size-14') }}</span>
+            <span class="bubble bubble--slow left-[14%] top-[58%] hidden size-24 sm:flex [animation-delay:-3s]">{{ ui.file_badge('doc', 'size-16') }}</span>
+            <span class="bubble right-[8%] top-[12%] hidden size-24 sm:flex [animation-delay:-5s]"><span class="flex size-14 items-center justify-center rounded-full bg-sun/60 text-ink sm:size-16">{{ icons.icon('folder', 'size-7') }}</span></span>
+            <span class="bubble bubble--slow right-[15%] top-[60%] hidden size-16 sm:flex [animation-delay:-7s]">{{ ui.file_badge('ppt', 'size-11') }}</span>
+            {% for tag in popularTags|slice(0, 2) %}
+                <span class="bubble hidden h-11 rounded-full px-4 text-sm font-bold md:flex {{ loop.first ? 'left-[24%] top-[6%] [animation-delay:-2s]' : 'right-[26%] top-[78%] bubble--slow [animation-delay:-9s]' }}">#{{ tag.name }}</span>
+            {% endfor %}
+        </div>
+
+        <p class="relative mx-auto inline-flex items-center gap-2 rounded-full bg-ink/45 px-4 py-1.5 text-sm font-semibold text-white ring-1 ring-white/30 backdrop-blur-sm">
+            {{ icons.icon('sparkle', 'size-4') }} {{ 'home.badge'|trans({'%count%': documentCount}) }}
+        </p>
+        <h1 id="hero-title" class="relative mx-auto mt-5 max-w-3xl text-4xl font-extrabold leading-[1.05] tracking-tight text-ink sm:text-6xl">
+            {{ 'home.hero_title'|trans }}
+        </h1>
+        <p class="relative mx-auto mt-5 w-fit max-w-xl rounded-2xl bg-ink/45 px-5 py-2.5 text-base font-semibold text-white backdrop-blur-sm sm:text-lg">
+            {{ 'home.hero_subtitle'|trans }}
+        </p>
+    </div>
+
+    <div class="relative z-10 mx-auto -mt-10 max-w-3xl px-1 sm:-mt-11">
+        {{ include('_partials/search_bar.html.twig') }}
+        <p class="mt-4 text-center text-sm text-muted">
+            {{ 'home.or'|trans }} <a href="{{ path('proposal_add') }}" class="font-bold text-ink underline decoration-action decoration-2 underline-offset-4 hover:decoration-ink">{{ 'home.propose'|trans }}</a>
+        </p>
+    </div>
+
+    {% if popularTags is not empty or popularFolders is not empty %}
+    <div class="mx-auto mt-8 max-w-4xl">
+        <h2 class="sr-only">{{ 'home.suggestions'|trans }}</h2>
+        <ul class="flex flex-wrap justify-center gap-2">
+            {% for tag in popularTags %}
+                <li><a class="chip" href="{{ path('document_index', {tag: tag.slug}) }}">{{ icons.icon('search', 'size-4 text-muted') }} {{ tag.name }}</a></li>
+            {% endfor %}
+            {% for folder in popularFolders %}
+                <li><a class="chip" href="{{ path('folder_show', {slug: folder.slug}) }}">{{ icons.icon('folder', 'size-4 text-muted') }} {{ folder.path }}</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</section>
+
+<section class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8" aria-labelledby="latest-title">
+    <div class="mb-6 flex items-end justify-between gap-4">
+        <div>
+            <h2 id="latest-title" class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ 'home.latest'|trans }}</h2>
+            <p class="mt-1 text-muted">{{ 'home.latest_subtitle'|trans }}</p>
+        </div>
+        <a href="{{ path('document_index') }}" class="btn btn-ghost hidden sm:inline-flex">{{ 'home.see_all'|trans }} {{ icons.icon('arrow', 'size-4') }}</a>
+    </div>
+    {% if latest is empty %}
+        {{ ui.empty_state('home.empty'|trans, 'home.empty_text'|trans, '<a class="btn btn-primary mt-2" href="' ~ path('proposal_add') ~ '">' ~ 'home.propose'|trans|e ~ '</a>') }}
+    {% else %}
+        <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {% for document in latest %}
+                <li>{{ ui.document_card(document) }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</section>
+
+{% set roots = folders|filter(f => f.parent is null) %}
+{% if roots is not empty %}
+<section class="mx-auto mt-16 max-w-7xl px-4 sm:px-6 lg:px-8" aria-labelledby="folders-title">
+    <div class="mb-6 flex items-end justify-between gap-4">
+        <h2 id="folders-title" class="text-2xl font-extrabold tracking-tight sm:text-3xl">{{ 'home.folders'|trans }}</h2>
+        <a href="{{ path('folder_index') }}" class="btn btn-ghost hidden sm:inline-flex">{{ 'home.all_folders'|trans }} {{ icons.icon('arrow', 'size-4') }}</a>
+    </div>
+    <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {% for folder in roots|slice(0, 6) %}
+            <li>
+                <a href="{{ path('folder_show', {slug: folder.slug}) }}" class="card flex items-center gap-4 p-4 transition hover:-translate-y-0.5 hover:shadow-lift">
+                    <span class="flex size-12 items-center justify-center rounded-full bg-sun/50">{{ icons.icon('folder', 'size-6') }}</span>
+                    <span class="min-w-0 flex-1">
+                        <span class="block truncate font-bold">{{ folder.name }}</span>
+                        <span class="block text-sm text-muted">{{ 'folder.subfolders'|trans({'%count%': folder.children|length}) }}</span>
+                    </span>
+                    {{ icons.icon('arrow', 'size-5 text-muted') }}
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+</section>
+{% endif %}
+{% endblock %}

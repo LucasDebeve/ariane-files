@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ 'folders.title'|trans }}{% endblock %}
+
+{% block body %}
+<div class="mx-auto max-w-5xl px-4 pt-10 sm:px-6 lg:px-8">
+    <h1 class="page-title">{{ 'folders.title'|trans }}</h1>
+    <p class="mt-2 text-muted">{{ 'folders.subtitle'|trans }}</p>
+
+    <div class="mt-8">
+        {% if folders is empty %}
+            {{ ui.empty_state('folders.empty'|trans) }}
+        {% else %}
+            {{ include('folder/_tree.html.twig', {folders: folders, baseDepth: 0}) }}
+        {% endif %}
+    </div>
+
+    {% if rootDocuments is not empty %}
+        <h2 class="mt-12 text-xl font-extrabold">{{ 'folders.unfiled'|trans }}</h2>
+        <ul class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {% for document in rootDocuments %}<li>{{ ui.document_card(document) }}</li>{% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

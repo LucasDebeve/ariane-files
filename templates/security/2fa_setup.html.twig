@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+
+{% block title %}{{ 'twofactor.setup.title'|trans }}{% endblock %}
+
+{% block body %}
+<div class="mx-auto max-w-3xl px-4 pt-10 sm:px-6">
+    <h1 class="page-title">{{ 'twofactor.setup.title'|trans }}</h1>
+    <p class="mt-3 text-muted">{{ 'twofactor.setup.intro'|trans }}</p>
+    <div class="card mt-8 grid gap-8 p-6 sm:grid-cols-[auto_1fr] sm:p-8">
+        <div class="text-center">
+            <img src="{{ qrCode }}" alt="{{ 'twofactor.setup.qr_alt'|trans }}" width="220" height="220" class="mx-auto rounded-2xl bg-white ring-1 ring-line">
+            <details class="mt-3 text-left text-sm">
+                <summary class="cursor-pointer font-semibold text-muted">{{ 'twofactor.setup.manual'|trans }}</summary>
+                <code class="mt-2 block break-all rounded-xl bg-cream-deep p-3 font-mono text-xs">{{ secret }}</code>
+            </details>
+        </div>
+        <div>
+            <ol class="mb-6 grid gap-3 text-sm text-ink-soft">
+                <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">1</span>{{ 'twofactor.setup.step1'|trans }}</li>
+                <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">2</span>{{ 'twofactor.setup.step2'|trans }}</li>
+                <li class="flex gap-3"><span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-ink text-xs font-bold text-white">3</span>{{ 'twofactor.setup.step3'|trans }}</li>
+            </ol>
+            {{ form_start(form, {attr: {'data-turbo': 'false'}}) }}
+                {{ form_row(form.code, {attr: {class: 'field-input text-center text-2xl font-bold tracking-[0.5em]'}}) }}
+                <button type="submit" class="btn btn-primary w-full py-3.5 text-base">{{ icons.icon('shield', 'size-5') }} {{ 'twofactor.setup.submit'|trans }}</button>
+            {{ form_end(form) }}
+            <p class="mt-4 text-center text-sm"><a class="font-semibold text-muted hover:text-ink" href="{{ logout_path() }}" data-turbo="false">{{ 'nav.logout'|trans }}</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

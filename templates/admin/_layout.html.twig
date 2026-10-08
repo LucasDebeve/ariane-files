@@ -1,0 +1,27 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+
+{% block body %}
+{% set route = app.current_route %}
+{% set items = [
+    {route: 'admin_dashboard', label: 'admin.nav.dashboard', icon: 'chart'},
+    {route: 'admin_users', label: 'admin.nav.users', icon: 'users'},
+    {route: 'admin_share_code', label: 'admin.nav.share_code', icon: 'key'},
+    {route: 'admin_folders', label: 'admin.nav.folders', icon: 'folder'},
+    {route: 'admin_trash', label: 'admin.nav.trash', icon: 'trash'},
+    {route: 'admin_audit', label: 'admin.nav.audit', icon: 'log'},
+] %}
+<div class="mx-auto max-w-7xl px-4 pt-8 sm:px-6 lg:px-8">
+    <p class="text-sm font-bold uppercase tracking-widest text-muted">{{ 'admin.title'|trans }}</p>
+    <nav class="mt-3 -mx-4 overflow-x-auto px-4" aria-label="{{ 'admin.title'|trans }}">
+        <ul class="flex w-max gap-1 rounded-full bg-cream-deep/80 p-1">
+            {% for item in items %}
+                <li><a href="{{ path(item.route) }}" class="nav-link" {% if route == item.route or (route starts with item.route ~ '_' and item.route != 'admin_dashboard') %}aria-current="page"{% endif %}>{{ icons.icon(item.icon, 'size-4') }} {{ item.label|trans }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+    <div class="mt-8">
+        {% block admin_body %}{% endblock %}
+    </div>
+</div>
+{% endblock %}

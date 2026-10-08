@@ -1,0 +1,75 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ criteria.hasQuery ? 'documents.search_title'|trans({'%q%': criteria.query}) : 'documents.title'|trans }}{% endblock %}
+
+{% block body %}
+{% set params = {q: criteria.query, dossier: criteria.folder ? criteria.folder.slug : null, tag: criteria.tag ? criteria.tag.slug : null}|filter(v => v is not null and v != '') %}
+<section class="mx-auto max-w-7xl px-4 pt-6 sm:px-6 lg:px-8">
+    <div class="hero-mesh hero-mesh--compact px-6 pb-16 pt-10 sm:px-10">
+        <h1 class="page-title">{{ 'documents.title'|trans }}</h1>
+        <p class="mt-3 w-fit rounded-2xl bg-ink/45 px-4 py-2 font-semibold text-white backdrop-blur-sm">{{ 'documents.subtitle'|trans }}</p>
+    </div>
+    <div class="relative z-10 mx-auto -mt-9 max-w-3xl">
+        {{ include('_partials/search_bar.html.twig', {currentQuery: criteria.query, currentFolder: criteria.folder}) }}
+    </div>
+</section>
+
+<section class="mx-auto mt-10 max-w-7xl px-4 sm:px-6 lg:px-8" data-controller="selection">
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+            <p class="text-lg font-bold" role="status">
+                {{ 'documents.results'|trans({'%count%': result.total}) }}
+                {% if criteria.hasQuery %}<span class="text-muted">{{ 'documents.for'|trans({'%q%': criteria.query}) }}</span>{% endif %}
+            </p>
+            {% if criteria.folder or criteria.tag %}
+                <p class="mt-2 flex flex-wrap items-center gap-2 text-sm">
+                    {% if criteria.folder %}
+                        <a class="chip chip-active" href="{{ path('document_index', params|filter((v, k) => k != 'dossier')) }}">{{ icons.icon('folder', 'size-4') }} {{ criteria.folder.path }} {{ icons.icon('x', 'size-3.5') }}<span class="sr-only">{{ 'documents.remove_filter'|trans }}</span></a>
+                    {% endif %}
+                    {% if criteria.tag %}
+                        <a class="chip chip-active" href="{{ path('document_index', params|filter((v, k) => k != 'tag')) }}">#{{ criteria.tag.name }} {{ icons.icon('x', 'size-3.5') }}<span class="sr-only">{{ 'documents.remove_filter'|trans }}</span></a>
+                    {% endif %}
+                </p>
+            {% endif %}
+        </div>
+        {% if result.documents is not empty %}
+        <label class="flex items-center gap-2 text-sm font-semibold text-ink-soft">
+            <input type="checkbox" class="size-5 rounded-md accent-[var(--color-action-dark)]" data-selection-target="all" data-action="selection#toggleAll">
+            {{ 'documents.select_all'|trans }}
+        </label>
+        {% endif %}
+    </div>
+
+    {% if popularTags is not empty and not criteria.tag %}
+        <ul class="mt-5 flex flex-wrap gap-2" aria-label="{{ 'documents.tags'|trans }}">
+            {% for tag in popularTags %}
+                <li><a class="chip" href="{{ path('document_index', params|merge({tag: tag.slug})) }}">{{ icons.icon('tag', 'size-4 text-muted') }} {{ tag.name }}</a></li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="mt-8">
+        {% if result.documents is empty %}
+            {{ ui.empty_state('documents.empty'|trans, 'documents.empty_text'|trans, '<a class="btn btn-primary mt-2" href="' ~ path('proposal_add') ~ '">' ~ 'home.propose'|trans|e ~ '</a>') }}
+        {% else %}
+            <ul class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {% for document in result.documents %}
+                    <li>{{ ui.document_card(document, true) }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    {{ ui.pagination(result.page, result.pageCount, 'document_index', params) }}
+
+    <form id="zip-form" method="post" action="{{ path('document_zip') }}" data-turbo="false">
+        <input type="hidden" name="_token" value="{{ csrf_token('document_zip') }}">
+        <div class="fixed inset-x-0 bottom-4 z-30 mx-auto flex w-fit items-center gap-4 rounded-full bg-ink py-2 pl-6 pr-2 text-white shadow-lift" data-selection-target="bar" hidden>
+            <p class="text-sm font-semibold"><span data-selection-target="count">0</span> {{ 'documents.selected'|trans }}</p>
+            <button type="submit" class="btn btn-primary">{{ icons.icon('zip', 'size-4') }} {{ 'documents.download_zip'|trans }}</button>
+        </div>
+    </form>
+</section>
+{% endblock %}

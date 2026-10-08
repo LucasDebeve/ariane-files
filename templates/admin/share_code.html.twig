@@ -1,0 +1,32 @@
+{% extends 'admin/_layout.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+
+{% block title %}{{ 'admin.share_code.title'|trans }}{% endblock %}
+
+{% block admin_body %}
+<h1 class="page-title">{{ 'admin.share_code.title'|trans }}</h1>
+<p class="mt-2 max-w-2xl text-muted">{{ 'admin.share_code.subtitle'|trans }}</p>
+
+{% if newCode %}
+    <div class="hero-mesh hero-mesh--compact mt-6 p-6 sm:p-8" data-controller="clipboard">
+        <p class="font-bold">{{ 'admin.share_code.new_code'|trans }}</p>
+        <div class="mt-3 flex flex-wrap items-center gap-3">
+            <code class="rounded-2xl bg-white px-5 py-3 font-mono text-2xl font-extrabold tracking-widest sm:text-3xl" data-clipboard-target="source">{{ newCode }}</code>
+            <button type="button" class="btn btn-dark" data-action="clipboard#copy">{{ icons.icon('copy', 'size-4') }} <span data-clipboard-target="label" data-done="{{ 'admin.share_code.copied'|trans }}">{{ 'admin.share_code.copy'|trans }}</span></button>
+        </div>
+        <p class="mt-3 text-sm font-semibold">{{ 'admin.share_code.shown_once'|trans }}</p>
+    </div>
+{% endif %}
+
+<div class="card mt-6 p-6 sm:p-8">
+    <dl class="grid gap-2 text-sm">
+        <dt class="text-muted">{{ 'admin.share_code.last_rotation'|trans }}</dt>
+        <dd class="text-lg font-bold">{{ active ? active.rotatedAt|format_datetime('long', 'short', locale: 'fr') : 'admin.share_code.none'|trans }}{% if active and active.rotatedBy %} · {{ active.rotatedBy.displayName }}{% endif %}</dd>
+    </dl>
+    <form method="post" class="mt-6" data-turbo-confirm="{{ 'admin.share_code.confirm'|trans }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('share_code_rotate') }}">
+        <button type="submit" class="btn btn-primary">{{ icons.icon('restore', 'size-4') }} {{ 'admin.share_code.rotate'|trans }}</button>
+    </form>
+    <p class="mt-4 text-sm text-muted">{{ 'admin.share_code.warning'|trans }}</p>
+</div>
+{% endblock %}

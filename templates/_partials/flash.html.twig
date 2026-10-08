@@ -1,0 +1,15 @@
+{% import 'macros/icons.html.twig' as icons %}
+{% set flashes = app.flashes %}
+{% if flashes is not empty %}
+<div class="mx-auto mt-4 grid max-w-7xl gap-2 px-4 sm:px-6 lg:px-8" role="status" aria-live="polite">
+    {% for type, messages in flashes %}
+        {% for message in messages %}
+            <div class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold {{ type == 'error' ? 'bg-[#ffe3dd] text-[#8c1d18]' : 'bg-[#d9f7e8] text-action-ink' }}" data-controller="dismiss">
+                {{ icons.icon(type == 'error' ? 'info' : 'check', 'size-5 shrink-0') }}
+                <p class="flex-1">{{ message|trans }}</p>
+                <button type="button" class="rounded-full p-1 hover:bg-black/5" data-action="dismiss#close">{{ icons.icon('x', 'size-4') }}<span class="sr-only">{{ 'flash.close'|trans }}</span></button>
+            </div>
+        {% endfor %}
+    {% endfor %}
+</div>
+{% endif %}

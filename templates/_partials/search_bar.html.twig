@@ -1,0 +1,21 @@
+{# Search pill: round green button on the left, query field, folder selector on the right. #}
+{% import 'macros/icons.html.twig' as icons %}
+{% set currentQuery = currentQuery ?? '' %}
+{% set currentFolder = currentFolder ?? null %}
+<form action="{{ path('document_index') }}" method="get" role="search" class="flex items-center gap-2 rounded-full bg-white p-2 shadow-lift ring-1 ring-black/5 sm:gap-3">
+    <button type="submit" class="flex size-12 shrink-0 items-center justify-center rounded-full bg-action text-ink transition hover:bg-action-dark hover:text-white sm:size-14">
+        {{ icons.icon('search', 'size-5 sm:size-6') }}<span class="sr-only">{{ 'search.submit'|trans }}</span>
+    </button>
+    <label for="search-q" class="sr-only">{{ 'search.label'|trans }}</label>
+    <input id="search-q" type="search" name="q" value="{{ currentQuery }}" maxlength="200" autocomplete="off"
+           placeholder="{{ 'search.placeholder'|trans }}"
+           class="min-w-0 flex-1 bg-transparent py-3 text-base font-medium text-ink placeholder:text-muted focus:outline-none sm:text-lg">
+    <span class="hidden h-8 w-px bg-line sm:block" aria-hidden="true"></span>
+    <label for="search-folder" class="sr-only">{{ 'search.folder'|trans }}</label>
+    <select id="search-folder" name="dossier" class="hidden max-w-48 cursor-pointer truncate rounded-full bg-transparent py-3 pl-2 pr-8 text-sm font-semibold text-ink-soft focus:outline-none sm:block">
+        <option value="">{{ 'search.all_folders'|trans }}</option>
+        {% for folder in folders %}
+            <option value="{{ folder.slug }}" {% if currentFolder and currentFolder.id == folder.id %}selected{% endif %}>{{ '— '|repeat(folder.depth) }}{{ folder.name }}</option>
+        {% endfor %}
+    </select>
+</form>

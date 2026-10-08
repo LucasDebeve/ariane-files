@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+{% import 'macros/icons.html.twig' as icons %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ 'certified.title'|trans }}{% endblock %}
+
+{% macro type_badge(type) %}
+    {%- set styles = {ajout: 'bg-action/15 text-action-ink', modification: 'bg-[#dfeaff] text-[#1d4ed8]', suppression: 'bg-coral/15 text-[#b3261e]'} -%}
+    <span class="inline-flex rounded-full px-2.5 py-1 text-xs font-bold {{ styles[type.value] }}">{{ type.label|trans }}</span>
+{% endmacro %}
+
+{% block body %}
+<div class="mx-auto max-w-6xl px-4 pt-10 sm:px-6 lg:px-8">
+    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+            <h1 class="page-title">{{ 'certified.title'|trans }}</h1>
+            <p class="mt-2 text-muted">{{ 'certified.subtitle'|trans }}</p>
+        </div>
+        <span class="pill bg-white px-4 py-2 text-sm ring-1 ring-line">{{ 'certified.pending_count'|trans({'%count%': pending|length}) }}</span>
+    </div>
+
+    <section class="mt-8" aria-labelledby="pending-title">
+        <h2 id="pending-title" class="sr-only">{{ 'certified.pending'|trans }}</h2>
+        {% if pending is empty %}
+            <div class="card flex flex-col items-center gap-3 px-6 py-14 text-center">
+                <span class="flex size-14 items-center justify-center rounded-full bg-action/15 text-action-ink">{{ icons.icon('check', 'size-7') }}</span>
+                <p class="text-lg font-bold">{{ 'certified.nothing'|trans }}</p>
+            </div>
+        {% else %}
+            <ul class="grid gap-3">
+                {% for request in pending %}
+                    {% set file = request.file %}
+                    <li>
+                        <a href="{{ path('certified_review', {id: request.id}) }}" class="card flex flex-col gap-4 p-5 transition hover:-translate-y-0.5 hover:shadow-lift sm:flex-row sm:items-center">
+                            {{ ui.file_badge(file ? file.mimeType|file_family : (request.videoUrl ? 'video' : (request.document and request.document.videoLink ? 'video' : (request.document ? request.document.mimeType|file_family : 'txt')))) }}
+                            <div class="min-w-0 flex-1">
+                                <p class="flex flex-wrap items-center gap-2">{{ _self.type_badge(request.type) }}
+                                    <span class="truncate font-bold">{{ request.title ?? (request.document ? request.document.title : '') }}</span>
+                                </p>
+                                <p class="mt-1 text-sm text-muted">{{ 'certified.proposed_by'|trans({'%name%': request.proposerName, '%date%': request.createdAt|format_datetime('medium', 'short', locale: 'fr')}) }}</p>
+                            </div>
+                            <span class="btn btn-dark self-start sm:self-center">{{ 'certified.review'|trans }} {{ icons.icon('arrow', 'size-4') }}</span>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </section>
+
+    {% if reviewed is not empty %}
+    <section class="mt-14" aria-labelledby="history-title">
+        <h2 id="history-title" class="text-xl font-extrabold">{{ 'certified.history'|trans }}</h2>
+        <div class="card mt-4 overflow-x-auto">
+            <table class="w-full min-w-[40rem] text-left text-sm">
+                <thead class="text-muted">
+                    <tr class="border-b border-line">
+                        <th scope="col" class="px-5 py-3 font-semibold">{{ 'certified.col.type'|trans }}</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">{{ 'certified.col.document'|trans }}</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">{{ 'certified.col.decision'|trans }}</th>
+                        <th scope="col" class="px-5 py-3 font-semibold">{{ 'certified.col.reviewer'|trans }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in reviewed %}
+                        <tr class="border-b border-line/60 last:border-0">
+                            <td class="px-5 py-3">{{ _self.type_badge(request.type) }}</td>
+                            <td class="px-5 py-3"><a class="font-semibold hover:underline" href="{{ path('certified_review', {id: request.id}) }}">{{ request.title ?? (request.document ? request.document.title : '—') }}</a></td>
+                            <td class="px-5 py-3"><span class="font-semibold {{ request.status.value == 'validee' ? 'text-action-ink' : 'text-[#b3261e]' }}">{{ request.status.label|trans }}</span></td>
+                            <td class="px-5 py-3 text-muted">{{ request.reviewer ? request.reviewer.displayName : '—' }} · {{ request.reviewedAt|format_date('short', locale: 'fr') }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+    {% endif %}
+</div>
+{% endblock %}

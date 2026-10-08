@@ -1,0 +1,29 @@
+{% extends 'admin/_layout.html.twig' %}
+{% import 'macros/ui.html.twig' as ui %}
+
+{% block title %}{{ 'admin.trash.title'|trans }}{% endblock %}
+
+{% block admin_body %}
+<h1 class="page-title">{{ 'admin.trash.title'|trans }}</h1>
+<p class="mt-2 text-muted">{{ 'admin.trash.subtitle'|trans({'%days%': retentionDays}) }}</p>
+<div class="mt-6">
+    {% if documents is empty %}
+        {{ ui.empty_state('admin.trash.empty'|trans) }}
+    {% else %}
+        <ul class="grid gap-3">
+            {% for document in documents %}
+                {% set purgeAt = document.deletedAt|date_modify('+' ~ retentionDays ~ ' days') %}
+                <li class="card flex flex-wrap items-center gap-4 p-4">
+                    {{ ui.file_badge(document.videoLink ? 'video' : document.mimeType|file_family) }}
+                    <div class="min-w-0 flex-1">
+                        <p class="truncate font-bold">{{ document.title }}</p>
+                        <p class="text-sm text-muted">{{ 'admin.trash.deleted_at'|trans({'%date%': document.deletedAt|format_date('medium', locale: 'fr'), '%purge%': purgeAt|format_date('medium', locale: 'fr')}) }}</p>
+                    </div>
+                    {{ ui.csrf_post(path('admin_trash_restore', {id: document.id}), 'trash_' ~ document.id, 'admin.trash.restore'|trans, 'btn btn-ghost py-2', 'restore') }}
+                    {{ ui.csrf_post(path('admin_trash_purge', {id: document.id}), 'trash_' ~ document.id, 'admin.trash.purge'|trans, 'btn btn-danger py-2', 'trash', 'admin.trash.purge_confirm'|trans) }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

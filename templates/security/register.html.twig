@@ -1,0 +1,23 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}{{ 'registration.title'|trans }}{% endblock %}
+
+{% block body %}
+{% set content %}
+    <h1 class="text-2xl font-extrabold">{{ 'registration.title'|trans }}</h1>
+    <p class="mt-1 text-sm text-muted">{{ 'registration.subtitle'|trans }}</p>
+    {{ form_start(form, {attr: {class: 'mt-6', novalidate: 'novalidate', 'data-turbo': 'false'}}) }}
+        {{ form_errors(form) }}
+        {{ form_row(form.displayName) }}
+        {{ form_row(form.email) }}
+        {{ form_row(form.plainPassword.first) }}
+        {{ form_row(form.plainPassword.second) }}
+        <div class="mb-6" data-controller="altcha" data-altcha-worker-value="{{ asset('lib/altcha/pbkdf2.js') }}">
+            <link rel="stylesheet" href="{{ asset('lib/altcha/altcha.css') }}">
+            <altcha-widget challenge="{{ path('captcha_challenge') }}" name="altcha" language="fr-fr" hidefooter auto="onfocus"></altcha-widget>
+        </div>
+        <button type="submit" class="btn btn-primary w-full py-3.5 text-base">{{ 'registration.submit'|trans }}</button>
+    {{ form_end(form) }}
+{% endset %}
+{{ include('security/_card.html.twig', {icon: 'user', content: content}) }}
+{% endblock %}

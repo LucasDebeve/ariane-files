@@ -6,7 +6,11 @@
 FROM php:8.3-fpm-alpine AS php_base
 
 COPY --from=ghcr.io/mlocati/php-extension-installer:2.7 /usr/bin/install-php-extensions /usr/local/bin/
-RUN install-php-extensions intl opcache pdo_pgsql zip apcu \
+# PHPIZE_DEPS (autoconf…) is installed explicitly: the installer does not pull autoconf
+# itself on recent Alpine releases, which breaks PECL builds such as apcu.
+RUN apk add --no-cache --virtual .phpize-deps $PHPIZE_DEPS \
+    && install-php-extensions intl opcache pdo_pgsql zip apcu \
+    && apk del .phpize-deps \
     && apk add --no-cache fcgi tini
 
 COPY docker/php/php.ini /usr/local/etc/php/conf.d/zz-ariane.ini
@@ -45,14 +49,3 @@ USER www-data
 HEALTHCHECK --interval=30s --timeout=5s CMD SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET cgi-fcgi -bind -connect 127.0.0.1:9000 || exit 1
 ENTRYPOINT ["/sbin/tini", "--"]
 CMD ["php-fpm"]
-
-############################
-# Caddy with the CrowdSec bouncer, serving the compiled public/ directory
-############################
-FROM caddy:2.10-builder AS caddy_build
-RUN xcaddy build --with github.com/hslatman/caddy-crowdsec-bouncer/http
-
-FROM caddy:2.10 AS caddy
-COPY --from=caddy_build /usr/bin/caddy /usr/bin/caddy
-COPY docker/caddy/Caddyfile /etc/caddy/Caddyfile
-COPY --from=build /srv/app/public /srv/app/public

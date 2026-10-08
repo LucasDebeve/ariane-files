@@ -34,9 +34,14 @@ final class ReviewService
     ) {
     }
 
-    public function approve(ChangeRequest $request, User $reviewer, ?string $comment): Document
+    /**
+     * @param bool $allowOwn lifts the self-review rule; reserved to the console (app:proposals:approve-all --allow-own)
+     */
+    public function approve(ChangeRequest $request, User $reviewer, ?string $comment, bool $allowOwn = false): Document
     {
-        $this->assertCanReview($request, $reviewer);
+        if (!$allowOwn) {
+            $this->assertCanReview($request, $reviewer);
+        }
         $obsoleteKeys = [];
         $process = false;
         $quarantineKey = $request->getQuarantineKey();
@@ -59,6 +64,7 @@ final class ReviewService
                 'type' => $request->getType()->value,
                 'document' => $document->getId()->toRfc4122(),
                 'proposer' => $request->getProposerName(),
+                'reviewer' => $reviewer->getEmail(),
             ]);
             $this->entityManager->flush();
 

@@ -1,6 +1,6 @@
 # CLAUDE.md — Ariane, drive des formateurs BAFA/BAFD
 
-> Application **Ariane** — domaine `ariane.krappo.fr`, fichiers servis par `files.ariane.krappo.fr`.
+> Application **Ariane** — domaine `ariane.lucasdebeve.eu`, fichiers servis par `files.ariane.lucasdebeve.eu`.
 
 ## 1. Objectif
 
@@ -26,7 +26,7 @@ Application web de stockage et de partage de documents (PDF, docx, pptx, xlsx, i
 | ZIP groupé | ZipStream-PHP, à la volée depuis S3 |
 | Captcha | Altcha v3 (preuve de travail PBKDF2, build « external » compatible CSP) |
 | 2FA | `scheb/2fa-bundle` + TOTP, obligatoire pour les certifiés |
-| Proxy / sécurité réseau | Caddy (+ bouncer CrowdSec) |
+| Proxy / sécurité réseau | Caddy partagé du VPS (`~/configuration/caddy`) |
 | Déploiement | Docker Compose sur VPS OVH, sauvegardes restic chiffrées vers un second fournisseur |
 
 ## 3. Rôles
@@ -50,7 +50,7 @@ Application web de stockage et de partage de documents (PDF, docx, pptx, xlsx, i
 
 ## 6. Sécurité (non négociable)
 
-Garage jamais exposé (réseau Docker interne ; Caddy ne relaie que les GET/HEAD présignés) · code de partage haché + limitation (5 essais / 15 min / IP) + session régénérée · CSP stricte à nonce (pas d'`unsafe-inline` pour les scripts), HSTS, `nosniff`, `X-Frame-Options: DENY`, cookies `HttpOnly`/`Secure`/`SameSite=Lax` limités à l'hôte · CSRF sur tous les formulaires (jetons en session) · Argon2id · 2FA obligatoire (redirection forcée vers l'enrôlement) · voters pour toutes les autorisations (`SHARE_ACCESS`, `DOCUMENT_*`, `CHANGE_REQUEST_*`) · Tika et Gotenberg sans accès sortant · journal d'audit · LUKS, pare-feu, restic (voir `docs/deploiement.md`).
+Garage jamais publié sur l'hôte (réseaux Docker uniquement ; Caddy ne relaie que les GET/HEAD présignés) · code de partage haché + limitation (5 essais / 15 min / IP) + session régénérée · CSP stricte à nonce (pas d'`unsafe-inline` pour les scripts), HSTS, `nosniff`, `X-Frame-Options: DENY`, cookies `HttpOnly`/`Secure`/`SameSite=Lax` limités à l'hôte · CSRF sur tous les formulaires (jetons en session) · Argon2id · 2FA obligatoire (redirection forcée vers l'enrôlement) · voters pour toutes les autorisations (`SHARE_ACCESS`, `DOCUMENT_*`, `CHANGE_REQUEST_*`) · Tika et Gotenberg sans accès sortant · journal d'audit · LUKS, pare-feu, restic (voir `docs/deploiement.md`).
 
 ## 7. Direction visuelle
 

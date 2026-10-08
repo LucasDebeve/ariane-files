@@ -1,6 +1,6 @@
 # Ariane
 
-Drive souverain des formateurs BAFA/BAFD — **ariane.krappo.fr**.
+Drive souverain des formateurs BAFA/BAFD — **ariane.lucasdebeve.eu**.
 
 Consultation et téléchargement sans compte grâce à un **code de partage commun**, propositions
 d'ajout / modification / suppression ouvertes à tous (avec un simple nom), **validées par un
@@ -9,7 +9,7 @@ utilisateur certifié** (compte avec double authentification) avant publication.
 - Symfony 7.4 (PHP 8.3), Doctrine, PostgreSQL 16 (`unaccent`, `pg_trgm`, plein texte `french`)
 - Twig + Turbo + Stimulus + Tailwind CSS 4 (AssetMapper, aucune dépendance CDN, CSP stricte)
 - Garage (S3) via Flysystem, ClamAV, Apache Tika (OCR Tesseract), Gotenberg, pdf.js, ZipStream
-- Altcha (captcha sans pistage), `scheb/2fa-bundle` (TOTP), Caddy + CrowdSec, restic
+- Altcha (captcha sans pistage), `scheb/2fa-bundle` (TOTP), Caddy (celui du VPS, partagé), restic
 
 Le cahier des charges et les décisions prises sont dans [`CLAUDE.md`](CLAUDE.md), le déploiement
 dans [`docs/deploiement.md`](docs/deploiement.md).
@@ -55,6 +55,7 @@ La CI GitHub Actions (`.github/workflows/ci.yml`) exécute tout cela et construi
 |---|---|
 | `app:share-code:rotate [--code=…]` | Génère un nouveau code de partage (l'ancien cesse immédiatement de fonctionner) |
 | `app:admin:create <email> [nom] [--password-stdin]` | Crée ou promeut l'administrateur |
+| `app:proposals:approve-all <email> [--comment=…] [--dry-run] [--allow-own]` | Valide toutes les propositions en attente au nom d'un compte certifié (`--allow-own` : y compris les siennes) |
 | `app:purge` | Purge corbeille (30 j) et fichiers des propositions refusées (7 j) — planifié chaque nuit |
 | `app:documents:reprocess` | Relance extraction de texte / aperçus manquants |
 | `app:demo:load` | Données de démonstration (hors production) |

@@ -1,4 +1,6 @@
-# Production stack for ariane.krappo.fr (files.ariane.krappo.fr serves presigned downloads).
+# Production stack for ariane.lucasdebeve.eu (files.ariane.lucasdebeve.eu serves presigned downloads).
+# No reverse proxy here: the VPS-wide Caddy (~/configuration/caddy) terminates TLS and reaches
+# php and garage through the external `proxy` network (see caddy/conf/sites/ariane.caddy there).
 # Usage: docker compose --env-file .env.prod up -d --build
 name: ariane
 
@@ -23,25 +25,32 @@ x-app: &app
   networks: [backend]
 
 services:
-  caddy:
+  # Copies the compiled public/ directory into the volume the shared Caddy serves static
+  # files from. Runs on every `up`, so the volume always matches the image.
+  assets:
+    image: ariane-app:latest
     build:
       context: .
-      target: caddy
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-      - "443:443/udp"
-    env_file: .env.prod
+      target: app
+    user: root
+    restart: "no"
+    network_mode: none
+    command: ["sh", "-c", "find /export -mindepth 1 -delete && cp -a /srv/app/public/. /export/"]
+    healthcheck:
+      disable: true
     volumes:
-      - caddy_data:/data
-      - caddy_config:/config
-      - caddy_logs:/var/log/caddy
-    depends_on: [php, crowdsec]
-    networks: [edge, backend]
+      - public:/export
 
   php:
     <<: *app
+    depends_on:
+      database: { condition: service_healthy }
+      garage: { condition: service_started }
+      assets: { condition: service_completed_successfully }
+    networks:
+      backend: {}
+      proxy:
+        aliases: [ariane-php]
 
   worker:
     <<: *app
@@ -64,7 +73,7 @@ services:
       retries: 10
     networks: [backend]
 
-  # Garage S3: internal network only, never published. Files reach users through
+  # Garage S3: never published on the host. Files reach users through the shared
   # Caddy's files.* vhost, which forwards presigned GET/HEAD requests only.
   garage:
     image: dxflrs/garage:v2.1.0
@@ -76,7 +85,10 @@ services:
       - ./docker/garage/garage.toml:/etc/garage.toml:ro
       - garage_meta:/var/lib/garage/meta
       - garage_data:/var/lib/garage/data
-    networks: [backend]
+    networks:
+      backend: {}
+      proxy:
+        aliases: [ariane-garage]
 
   clamav:
     image: clamav/clamav:stable
@@ -105,32 +117,20 @@ services:
       - --libreoffice-disable-routes=false
     networks: [backend]
 
-  crowdsec:
-    image: crowdsecurity/crowdsec:v1.7.0
-    restart: unless-stopped
-    environment:
-      COLLECTIONS: "crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/base-http-scenarios"
-      BOUNCER_KEY_caddy: ${CROWDSEC_BOUNCER_KEY}
-    volumes:
-      - ./docker/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
-      - crowdsec_db:/var/lib/crowdsec/data
-      - crowdsec_config:/etc/crowdsec
-      - caddy_logs:/var/log/caddy:ro
-    networks: [backend, egress]
-
 networks:
-  edge: {}
   egress: {}
   backend:
     internal: true
+  # Created by the shared Caddy stack (`make up` in ~/configuration).
+  proxy:
+    external: true
 
 volumes:
-  caddy_data: {}
-  caddy_config: {}
-  caddy_logs: {}
+  # Owned by the shared Caddy stack, which mounts it read-only.
+  public:
+    name: ariane_public
+    external: true
   db_data: {}
   garage_meta: {}
   garage_data: {}
   clamav_db: {}
-  crowdsec_db: {}
-  crowdsec_config: {}

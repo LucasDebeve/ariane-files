@@ -1,0 +1,81 @@
+{
+	email {$ACME_EMAIL}
+	servers {
+		trusted_proxies static private_ranges
+	}
+	crowdsec {
+		api_url http://crowdsec:8080
+		api_key {$CROWDSEC_BOUNCER_KEY}
+	}
+	order crowdsec first
+	log {
+		output file /var/log/caddy/access.log {
+			roll_size 50MiB
+			roll_keep 5
+		}
+		format json
+	}
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "same-origin"
+		-Server
+	}
+}
+
+# Application
+{$APP_DOMAIN} {
+	crowdsec
+	import security_headers
+	encode zstd gzip
+
+	request_body {
+		max_size 110MB
+	}
+
+	root * /srv/app/public
+
+	# Fingerprinted assets: long cache.
+	@assets path /assets/*
+	header @assets Cache-Control "public, max-age=31536000, immutable"
+
+	php_fastcgi php:9000 {
+		root /srv/app/public
+		trusted_proxies private_ranges
+	}
+	file_server
+}
+
+# Files: only presigned GET/HEAD requests are forwarded to Garage (never exposed otherwise).
+{$FILES_DOMAIN} {
+	crowdsec
+	import security_headers
+
+	header {
+		Content-Security-Policy "default-src 'none'; sandbox"
+		X-Frame-Options "DENY"
+		Cross-Origin-Resource-Policy "same-site"
+		# pdf.js on the application origin fetches previews from here.
+		Access-Control-Allow-Origin "https://{$APP_DOMAIN}"
+		Access-Control-Allow-Methods "GET, HEAD"
+		Access-Control-Expose-Headers "Content-Length, Content-Range, Accept-Ranges"
+		Vary "Origin"
+	}
+
+	@presigned {
+		method GET HEAD
+		path_regexp ^/({$S3_BUCKET_PUBLISHED}|{$S3_BUCKET_QUARANTINE})/[A-Za-z0-9/\-\.]+$
+		query X-Amz-Signature=*
+	}
+	handle @presigned {
+		reverse_proxy garage:3900 {
+			header_down -Set-Cookie
+		}
+	}
+	handle {
+		respond 404
+	}
+}

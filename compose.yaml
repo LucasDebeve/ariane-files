@@ -1,0 +1,136 @@
+# Production stack for ariane.krappo.fr (files.ariane.krappo.fr serves presigned downloads).
+# Usage: docker compose --env-file .env.prod up -d --build
+name: ariane
+
+x-app: &app
+  build:
+    context: .
+    target: app
+  image: ariane-app:latest
+  restart: unless-stopped
+  env_file: .env.prod
+  environment:
+    APP_ENV: prod
+    DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@database:5432/${POSTGRES_DB}?serverVersion=16&charset=utf8
+    S3_ENDPOINT: http://garage:3900
+    CLAMAV_HOST: clamav
+    TIKA_URL: http://tika:9998
+    GOTENBERG_URL: http://gotenberg:3000
+    ANTIVIRUS_DRIVER: clamav
+  depends_on:
+    database: { condition: service_healthy }
+    garage: { condition: service_started }
+  networks: [backend]
+
+services:
+  caddy:
+    build:
+      context: .
+      target: caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    env_file: .env.prod
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
+      - caddy_logs:/var/log/caddy
+    depends_on: [php, crowdsec]
+    networks: [edge, backend]
+
+  php:
+    <<: *app
+
+  worker:
+    <<: *app
+    command: ["php", "bin/console", "messenger:consume", "async", "scheduler_default", "--time-limit=3600", "--memory-limit=256M", "-vv"]
+    healthcheck:
+      disable: true
+
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      retries: 10
+    networks: [backend]
+
+  # Garage S3: internal network only, never published. Files reach users through
+  # Caddy's files.* vhost, which forwards presigned GET/HEAD requests only.
+  garage:
+    image: dxflrs/garage:v2.1.0
+    restart: unless-stopped
+    environment:
+      GARAGE_RPC_SECRET: ${GARAGE_RPC_SECRET}
+      GARAGE_ADMIN_TOKEN: ${GARAGE_ADMIN_TOKEN}
+    volumes:
+      - ./docker/garage/garage.toml:/etc/garage.toml:ro
+      - garage_meta:/var/lib/garage/meta
+      - garage_data:/var/lib/garage/data
+    networks: [backend]
+
+  clamav:
+    image: clamav/clamav:stable
+    restart: unless-stopped
+    volumes:
+      - clamav_db:/var/lib/clamav
+    # Needs outbound access for signature updates (freshclam).
+    networks: [backend, egress]
+
+  # Tika (with Tesseract OCR) and Gotenberg have no outbound network access.
+  tika:
+    image: apache/tika:3.2.3.0-full
+    restart: unless-stopped
+    networks: [backend]
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    restart: unless-stopped
+    command:
+      - gotenberg
+      - --api-timeout=120s
+      - --chromium-disable-javascript=true
+      - --chromium-allow-list=file:///tmp/.*
+      - --webhook-disable=true
+      - --api-disable-download-from=true
+      - --libreoffice-disable-routes=false
+    networks: [backend]
+
+  crowdsec:
+    image: crowdsecurity/crowdsec:v1.7.0
+    restart: unless-stopped
+    environment:
+      COLLECTIONS: "crowdsecurity/caddy crowdsecurity/http-cve crowdsecurity/base-http-scenarios"
+      BOUNCER_KEY_caddy: ${CROWDSEC_BOUNCER_KEY}
+    volumes:
+      - ./docker/crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml:ro
+      - crowdsec_db:/var/lib/crowdsec/data
+      - crowdsec_config:/etc/crowdsec
+      - caddy_logs:/var/log/caddy:ro
+    networks: [backend, egress]
+
+networks:
+  edge: {}
+  egress: {}
+  backend:
+    internal: true
+
+volumes:
+  caddy_data: {}
+  caddy_config: {}
+  caddy_logs: {}
+  db_data: {}
+  garage_meta: {}
+  garage_data: {}
+  clamav_db: {}
+  crowdsec_db: {}
+  crowdsec_config: {}

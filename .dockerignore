@@ -1,0 +1,17 @@
+.git
+.github
+.env.local
+.env.*.local
+.env.prod
+.env.prod.example
+var/
+vendor/
+public/assets/
+public/bundles/
+node_modules/
+tests/
+docs/
+compose*.yaml
+*.md
+.phpunit.cache
+.php-cs-fixer.cache

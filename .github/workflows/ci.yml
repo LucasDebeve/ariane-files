@@ -1,0 +1,84 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: ariane
+          POSTGRES_PASSWORD: ariane
+          POSTGRES_DB: ariane
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U ariane"
+          --health-interval 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://ariane:ariane@127.0.0.1:5432/ariane?serverVersion=16&charset=utf8
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: intl, pdo_pgsql, zip, sodium
+          coverage: none
+          tools: composer:v2
+
+      - name: Cache Composer packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/composer
+          key: composer-${{ hashFiles('composer.lock') }}
+
+      - run: composer install --no-progress --prefer-dist
+
+      - name: Coding standards
+        run: vendor/bin/php-cs-fixer fix --dry-run --diff
+
+      - name: Lint templates, translations and container
+        run: |
+          bin/console lint:twig templates
+          bin/console lint:yaml config translations
+          bin/console lint:container
+
+      - name: Static analysis
+        run: |
+          bin/console cache:warmup --env=dev
+          vendor/bin/phpstan analyse --no-progress
+
+      - name: Database schema
+        run: |
+          bin/console doctrine:database:create --env=test
+          bin/console doctrine:migrations:migrate --env=test --no-interaction
+          bin/console doctrine:schema:validate --env=test
+
+      - name: Build assets
+        run: bin/console tailwind:build
+
+      - name: Tests (unit, functional and end-to-end validation workflow)
+        run: bin/phpunit
+
+  docker:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build production images
+        run: |
+          docker build --target app -t ariane-app .
+          docker build --target caddy -t ariane-caddy .
+      - name: Validate Compose file
+        run: |
+          cp .env.prod.example .env.prod
+          docker compose --env-file .env.prod config --quiet

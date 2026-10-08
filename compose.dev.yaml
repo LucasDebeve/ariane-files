@@ -1,0 +1,28 @@
+# Optional services for local development (the app itself runs with `symfony serve`
+# or `php -S`). Usage: docker compose -f compose.dev.yaml up -d
+name: ariane-dev
+
+services:
+  database:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ariane
+      POSTGRES_USER: ariane
+      POSTGRES_PASSWORD: ariane
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [db_dev:/var/lib/postgresql/data]
+
+  clamav:
+    image: clamav/clamav:stable
+    ports: ["127.0.0.1:3310:3310"]
+
+  tika:
+    image: apache/tika:3.2.3.0-full
+    ports: ["127.0.0.1:9998:9998"]
+
+  gotenberg:
+    image: gotenberg/gotenberg:8
+    ports: ["127.0.0.1:3000:3000"]
+
+volumes:
+  db_dev: {}

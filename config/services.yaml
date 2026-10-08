@@ -1,0 +1,89 @@
+parameters:
+    # 100 MiB per file (videos are links only, never uploaded).
+    app.max_upload_bytes: 104857600
+    # 5 GiB for the whole quarantine bucket.
+    app.quarantine_quota_bytes: 5368709120
+    app.zip_max_files: 200
+    # 1 GiB per ZIP archive.
+    app.zip_max_bytes: 1073741824
+
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Dto/'
+            - '../src/Entity/'
+            - '../src/Enum/'
+            - '../src/Message/'
+            - '../src/Kernel.php'
+
+    # --- Storage (Garage / S3) -------------------------------------------------
+    app.s3_client:
+        class: Aws\S3\S3Client
+        arguments:
+            - version: 'latest'
+              region: '%env(S3_REGION)%'
+              endpoint: '%env(S3_ENDPOINT)%'
+              use_path_style_endpoint: true
+              credentials:
+                  key: '%env(S3_KEY)%'
+                  secret: '%env(S3_SECRET)%'
+
+    # Same credentials, but signs URLs for the public files.* host (path style).
+    app.s3_public_client:
+        class: Aws\S3\S3Client
+        arguments:
+            - version: 'latest'
+              region: '%env(S3_REGION)%'
+              endpoint: '%env(FILES_PUBLIC_URL)%'
+              use_path_style_endpoint: true
+              credentials:
+                  key: '%env(S3_KEY)%'
+                  secret: '%env(S3_SECRET)%'
+
+    App\Storage\DocumentStorage: '@App\Storage\FlysystemDocumentStorage'
+    App\Storage\TemporaryUrlGenerator: '@App\Storage\S3TemporaryUrlGenerator'
+
+    # --- Antivirus, text extraction, preview, captcha ----------------------------
+    App\Service\Antivirus\VirusScanner:
+        factory: ['App\Service\Antivirus\VirusScannerFactory', 'create']
+        arguments:
+            - '%env(ANTIVIRUS_DRIVER)%'
+            - '%env(CLAMAV_HOST)%'
+            - '%env(int:CLAMAV_PORT)%'
+            - '%kernel.environment%'
+
+    App\Service\TextExtraction\TikaTextExtractor:
+        arguments:
+            $tikaUrl: '%env(TIKA_URL)%'
+    App\Service\TextExtraction\TextExtractor: '@App\Service\TextExtraction\TikaTextExtractor'
+
+    App\Service\Preview\GotenbergPdfConverter:
+        arguments:
+            $gotenbergUrl: '%env(GOTENBERG_URL)%'
+    App\Service\Preview\PdfConverter: '@App\Service\Preview\GotenbergPdfConverter'
+
+    App\Service\Captcha\AltchaVerifier:
+        arguments:
+            $hmacKey: '%env(ALTCHA_HMAC_KEY)%'
+            $cache: '@cache.app'
+    App\Service\Captcha\CaptchaVerifier: '@App\Service\Captcha\AltchaVerifier'
+
+    # --- Sessions stored in PostgreSQL ------------------------------------------
+    Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler:
+        arguments:
+            - '%env(DATABASE_URL)%'
+            - { lock_mode: 1 }
+
+when@dev:
+    services:
+        App\Storage\TemporaryUrlGenerator: '@App\Storage\SignedRouteTemporaryUrlGenerator'
+
+when@test:
+    services:
+        App\Storage\TemporaryUrlGenerator: '@App\Storage\SignedRouteTemporaryUrlGenerator'
+        App\Service\Captcha\CaptchaVerifier: '@App\Service\Captcha\AlwaysValidCaptchaVerifier'

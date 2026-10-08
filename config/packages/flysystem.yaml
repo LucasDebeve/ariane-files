@@ -1,0 +1,32 @@
+# Two private storages: "quarantine" (pending proposals) and "published".
+# Production uses Garage (S3 API) on the internal Docker network only.
+flysystem:
+    storages:
+        quarantine.storage:
+            aws:
+                client: 'app.s3_client'
+                bucket: '%env(S3_BUCKET_QUARANTINE)%'
+        published.storage:
+            aws:
+                client: 'app.s3_client'
+                bucket: '%env(S3_BUCKET_PUBLISHED)%'
+
+when@dev:
+    flysystem:
+        storages:
+            quarantine.storage:
+                local:
+                    directory: '%kernel.project_dir%/var/storage/quarantine'
+            published.storage:
+                local:
+                    directory: '%kernel.project_dir%/var/storage/published'
+
+when@test:
+    flysystem:
+        storages:
+            quarantine.storage:
+                local:
+                    directory: '%kernel.project_dir%/var/storage/test/quarantine'
+            published.storage:
+                local:
+                    directory: '%kernel.project_dir%/var/storage/test/published'

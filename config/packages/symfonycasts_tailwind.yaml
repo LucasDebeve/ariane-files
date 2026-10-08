@@ -1,0 +1,3 @@
+symfonycasts_tailwind:
+    # Pinned so that no GitHub API call is needed to resolve the latest version.
+    binary_version: 'v4.3.3'

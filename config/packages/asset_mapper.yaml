@@ -1,0 +1,14 @@
+framework:
+    asset_mapper:
+        paths:
+            - assets/
+        excluded_patterns:
+            - '*/fonts/*.txt'
+        missing_import_mode: strict
+        # Every supported browser handles import maps natively: no CDN polyfill.
+        importmap_polyfill: false
+
+when@prod:
+    framework:
+        asset_mapper:
+            missing_import_mode: warn

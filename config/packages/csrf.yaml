@@ -1,0 +1,7 @@
+# Session-based (stateful) CSRF tokens on every form, login and logout.
+framework:
+    form:
+        csrf_protection:
+            enabled: true
+    csrf_protection:
+        enabled: true

@@ -1,0 +1,43 @@
+framework:
+    secret: '%env(APP_SECRET)%'
+    trusted_proxies: '%env(TRUSTED_PROXIES)%'
+    trusted_headers: ['x-forwarded-for', 'x-forwarded-host', 'x-forwarded-proto', 'x-forwarded-port']
+
+    session:
+        handler_id: Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler
+        name: ariane_session
+        cookie_secure: auto
+        cookie_httponly: true
+        cookie_samesite: lax
+        # Host-only cookie: no "domain" attribute, so it is never sent to files.* subdomain.
+        cookie_domain: null
+        cookie_lifetime: 2592000
+        gc_maxlifetime: 2592000
+
+    http_method_override: false
+    handle_all_throwables: true
+
+    rate_limiter:
+        share_code:
+            policy: sliding_window
+            limit: 5
+            interval: '15 minutes'
+        proposal:
+            policy: fixed_window
+            limit: 5
+            interval: '1 hour'
+        registration:
+            policy: fixed_window
+            limit: 3
+            interval: '1 hour'
+        zip:
+            policy: sliding_window
+            limit: 10
+            interval: '1 hour'
+
+when@test:
+    framework:
+        test: true
+        session:
+            handler_id: null
+            storage_factory_id: session.storage.factory.mock_file
